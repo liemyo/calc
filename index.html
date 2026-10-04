@@ -132,6 +132,7 @@ h1,h2{letter-spacing:-.01em}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fi{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;min-width:0}
 .fi.wide{grid-column:1/-1}
+.fi>span:first-child{flex:1}
 .fi i{font-weight:500;font-style:normal}
 .fi-in{display:flex;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
 .fi-in:focus-within{outline:2px solid color-mix(in srgb,var(--acc) 45%,transparent);border-color:var(--acc)}
@@ -272,7 +273,7 @@ dialog::backdrop{background:rgba(10,8,5,.45)}
 <dialog id="dlg"></dialog>
 <noscript>Calc memerlukan JavaScript.</noscript>
 <script>// Calc — kalkulator scientific + luas (m²) & volume (m³) konstruksi. Akun (nama pengguna + PIN) sama dengan Planner & Notes; data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-204901';
+const BUILD = '20261004-205250';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only cl_*/pl_* functions
 const ADMIN = 'admin';
 const HIST_MAX = 150;
@@ -497,6 +498,11 @@ const SHAPES = [
     rumus: 'V = b × n × (o × a / 2 + tb × √(o² + a²))', c: v => { const s = Math.sqrt(v.o * v.o + v.a * v.a); return [v.b * v.n * (v.o * v.a / 2 + v.tb * s), `${N(v.b)} × ${N(v.n)} × (${N(v.o)} × ${N(v.a)} / 2 + ${N(v.tb)} × ${N(s)})`]; } },
   { id: 'dinding', cat: 'vol', g: 'Struktur beton', n: 'Dinding beton / pasangan', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), L('tb', 'tb — tebal dinding'), AR('bk', 'Bukaan pintu/jendela (luas)', { opt: 1 })],
     rumus: 'V = (p × t − bukaan) × tb', c: v => [(v.p * v.t - (v.bk || 0)) * v.tb, `(${N(v.p)} × ${N(v.t)}${v.bk ? ' − ' + N(v.bk) : ''}) × ${N(v.tb)}`] },
+  { id: 'pagarpanel', cat: 'vol', g: 'Pagar', n: 'Pagar panel beton', ic: '🚧', svg: ['fence'],
+    f: [L('P', 'P — panjang pagar total'), L('t', 't — tinggi panel pagar'), L('jk', 'jk — jarak antar kolom (as ke as)'), L('tb', 'tb — tebal panel'), L('bk', 'bk — lebar kolom'), L('hk', 'hk — tebal kolom'),
+      L('tk', 'tk — tinggi kolom total (kosong = t)', { opt: 1 }), L('hp', 'hp — tinggi 1 lembar panel (untuk jumlah lembar)', { opt: 1 }),
+      L('pp', 'pp — panjang pondasi per kolom', { opt: 1 }), L('lp', 'lp — lebar pondasi per kolom', { opt: 1 }), L('tp', 'tp — tinggi pondasi per kolom', { opt: 1 })],
+    rumus: 'V = nk × bk × hk × tk + (P − nk × bk) × t × tb + nk × pp × lp × tp,  nk = ⌈P / jk⌉ + 1', c: v => pagar(v) },
   // volume — tanah & pondasi
   { id: 'galian', cat: 'vol', g: 'Tanah & pondasi', n: 'Galian / urugan trapesium', ic: '⛏', svg: ['trap', 'la', 'lb', 't'], f: [L('p', 'p — panjang galian'), L('la', 'la — lebar atas'), L('lb', 'lb — lebar bawah'), L('t', 't — kedalaman')], rumus: 'V = (la + lb) / 2 × t × p', c: v => [(v.la + v.lb) / 2 * v.t * v.p, `(${N(v.la)} + ${N(v.lb)}) / 2 × ${N(v.t)} × ${N(v.p)}`] },
   { id: 'galiank', cat: 'vol', g: 'Tanah & pondasi', n: 'Galian / urugan kotak', ic: '⛏', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('t', 't — kedalaman / tebal')], rumus: 'V = p × l × t', c: v => [v.p * v.l * v.t, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
@@ -521,6 +527,9 @@ const SHAPES = [
   { id: 'ketupat', cat: 'area', g: 'Bidang datar', n: 'Belah ketupat / layang-layang', ic: '◇', svg: ['kite'], f: [L('d1', 'd1 — diagonal 1'), L('d2', 'd2 — diagonal 2')], rumus: 'A = ½ × d1 × d2', c: v => [v.d1 * v.d2 / 2, `½ × ${N(v.d1)} × ${N(v.d2)}`] },
   { id: 'dindingluas', cat: 'area', g: 'Konstruksi', n: 'Dinding / plester / cat', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), AR('bk', 'Bukaan pintu/jendela (luas)', { opt: 1 }), CNT('s', 'Jumlah sisi (1 atau 2)', { opt: 1 })],
     rumus: 'A = (p × t − bukaan) × sisi', c: v => { const s = v.s || 1; return [(v.p * v.t - (v.bk || 0)) * s, `(${N(v.p)} × ${N(v.t)}${v.bk ? ' − ' + N(v.bk) : ''})${s !== 1 ? ' × ' + N(s) : ''}`]; } },
+  { id: 'pagarpanelA', cat: 'area', g: 'Konstruksi', n: 'Pagar panel (luas bidang)', ic: '🚧', svg: ['fence'],
+    f: [L('P', 'P — panjang pagar total'), L('t', 't — tinggi pagar'), AR('bk', 'Bukaan pintu gerbang (luas)', { opt: 1 }), L('jk', 'jk — jarak antar kolom (untuk jumlah kolom)', { opt: 1 }), L('hp', 'hp — tinggi 1 lembar panel (untuk jumlah lembar)', { opt: 1 })],
+    rumus: 'A = P × t − bukaan', c: v => { const a = v.P * v.t - (v.bk || 0), cnt = pagarCount(v); return [a, `${N(v.P)} × ${N(v.t)}${v.bk ? ' − ' + N(v.bk) : ''}${cnt}`]; } },
   { id: 'lantai', cat: 'area', g: 'Konstruksi', n: 'Lantai / keramik', ic: '🔲', svg: ['rect', 'p', 'l'], f: [L('p', 'p — panjang ruang'), L('l', 'l — lebar ruang')], rumus: 'A = p × l', c: v => [v.p * v.l, `${N(v.p)} × ${N(v.l)}`] },
   { id: 'bkkolom', cat: 'area', g: 'Konstruksi', n: 'Bekisting kolom', ic: '🏛', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang penampang'), L('l', 'l — lebar penampang'), L('t', 't — tinggi kolom')], rumus: 'A = 2 × (p + l) × t', c: v => [2 * (v.p + v.l) * v.t, `2 × (${N(v.p)} + ${N(v.l)}) × ${N(v.t)}`] },
   { id: 'bkbalok', cat: 'area', g: 'Konstruksi', n: 'Bekisting balok', ic: '▬', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang balok'), L('l', 'l — lebar (alas)'), L('t', 't — tinggi sisi')], rumus: 'A = (l + 2t) × p', c: v => [(v.l + 2 * v.t) * v.p, `(${N(v.l)} + 2 × ${N(v.t)}) × ${N(v.p)}`] },
@@ -530,6 +539,20 @@ const SHAPES = [
   { id: 'selimut', cat: 'area', g: 'Konstruksi', n: 'Selimut tabung', ic: '🥫', svg: ['cyl', 'd', 't'], f: [L('d', 'd — diameter'), L('t', 't — tinggi')], rumus: 'A = π × d × t', c: v => [Math.PI * v.d * v.t, `π × ${N(v.d)} × ${N(v.t)}`] }
 ];
 const chipsOpen = () => LS.get('chips') === '1';
+// pagar panel: jumlah kolom / segmen / lembar panel
+function pagarNum(v) {
+  if (!(v.jk > 0)) return null;
+  const seg = Math.max(1, Math.ceil(v.P / v.jk - 1e-9)), nk = seg + 1, lembar = v.hp > 0 ? seg * Math.ceil(v.t / v.hp - 1e-9) : 0;
+  return { seg, nk, lembar };
+}
+const pagarCount = v => { const c = pagarNum(v); return c ? `  (${c.nk} kolom, ${c.seg} bentang${c.lembar ? ', ' + c.lembar + ' lembar panel' : ''})` : ''; };
+function pagar(v) {
+  const c = pagarNum(v); if (!c) throw new Error('Jarak antar kolom harus > 0');
+  const tk = v.tk || v.t, net = v.P - c.nk * v.bk;
+  if (net < 0) throw new Error('Kolom terlalu lebar untuk panjang pagar ini');
+  const vk = c.nk * v.bk * v.hk * tk, vp = net * v.t * v.tb, vf = c.nk * (v.pp || 0) * (v.lp || 0) * (v.tp || 0);
+  return [vk + vp + vf, `kolom ${c.nk} × ${N(v.bk)} × ${N(v.hk)} × ${N(tk)} = ${R(vk)} + panel (${N(v.P)} − ${c.nk} × ${N(v.bk)}) × ${N(v.t)} × ${N(v.tb)} = ${R(vp)}${vf ? ` + pondasi ${c.nk} × ${N(v.pp)} × ${N(v.lp)} × ${N(v.tp)} = ${R(vf)}` : ''}${pagarCount(v)}`];
+}
 const SMAP = new Map(SHAPES.map(s => [s.id, s]));
 const UNIT_TXT = { vol: 'm³', area: 'm²' };
 
@@ -553,6 +576,7 @@ function svgFor(sh) {
     case 'trap': return W(`<path class="f1" d="M30 30h160l-40 90H70z"/>${T(110, 22, a)}${T(110, 140, b)}${T(184, 80, c, 'start')}`);
     case 'trapch': return W(`<path class="f1" d="M20 30h20l35 75h70l35-75h20l-42 92H62z"/>${T(110, 136, 'b')}${T(30, 70, 'h', 'end')}${T(58, 24, 'm')}${T(196, 66, 'tb', 'start')}${T(110, 60, '× p (panjang)')}`);
     case 'stair': return W(`<path class="f1" d="M30 125h30v-20h25v-20h25v-20h25v-20h25v-20h25v20l-130 100"/>${T(72, 120, 'a')}${T(55, 100, 'o', 'end')}${T(130, 120, 'tb', 'start')}${T(170, 140, '× b (lebar)')}`);
+    case 'fence': return W(`<path class="f3" d="M30 40h160v70H30z"/><path class="ln" d="M30 57.5h160M30 75h160M30 92.5h160"/>${[30, 83, 136, 183].map(x => `<path class="f1" d="M${x - 4} 30h11v90h-11z"/>`).join('')}<path class="dim" d="M30 132h160M200 40v70M31 22h53"/>${T(110, 146, 'P')}${T(205, 79, 't', 'start')}${T(57, 16, 'jk')}${T(22, 146, 'kolom', 'start')}`);
     case 'wall': return W(`<path class="f1" fill-rule="evenodd" d="M30 25h160v100H30zM55 60h30v65H55zM120 55h45v35h-45z"/>${T(110, 142, 'p')}${T(22, 78, 't', 'end')}${T(142, 76, 'bukaan')}`);
     case 'rect': return W(`<path class="f1" d="M45 30h130v90H45z"/>${T(110, 140, a)}${T(36, 79, b, 'end')}`);
     case 'tri': return W(`<path class="f1" d="M30 120h160L90 25z"/><path class="dim" d="M90 25v95"/>${T(110, 140, 'a')}${T(96, 85, 't', 'start')}`);
