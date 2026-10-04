@@ -1,0 +1,1228 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>/* phones + small tablets: whole app at 88% (layout widens to fill the screen); max-scale stops iOS zooming into inputs */
+if (Math.min(screen.width, screen.height) <= 820) document.querySelector('meta[name=viewport]').content = 'width=device-width, initial-scale=0.88, minimum-scale=0.88, maximum-scale=0.88, viewport-fit=cover';</script>
+<title>Calc</title>
+<meta name="description" content="Calc: kalkulator scientific online + hitung luas (m²) dan volume (m³) konstruksi — kolom, balok, plat, U-Ditch, box culvert, buis, tabung, galian — simpan, beri nama, dan sinkron real time di HP dan laptop.">
+<meta name="theme-color" content="#e8590c">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23e8590c'/><rect x='24' y='18' width='52' height='20' rx='5' fill='white'/><g fill='white'><circle cx='32' cy='54' r='6'/><circle cx='50' cy='54' r='6'/><circle cx='68' cy='54' r='6'/><circle cx='32' cy='72' r='6'/><circle cx='50' cy='72' r='6'/><circle cx='68' cy='72' r='6'/></g></svg>">
+<style>:root{--bg:#f5f4f1;--card:#fff;--soft:#efede8;--line:#e2dfd8;--text:#1b1a17;--muted:#6d6a63;--acc:#e8590c;--acc-ink:#fff;--key:#f3f2ee;--key2:#e7e5df;--op:#fde9dc;--op-ink:#c2410c;--ok:#1f9d55;--red:#d6383e;--shadow:0 1px 2px rgba(40,30,10,.05),0 4px 14px rgba(40,30,10,.05);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#121110;--card:#1c1b19;--soft:#262421;--line:#33302c;--text:#f2efe9;--muted:#a39e95;--acc:#ff8a3d;--acc-ink:#1b0e04;--key:#25231f;--key2:#2e2b27;--op:#3a2416;--op-ink:#ffae74;--ok:#4ad08a;--red:#ff6b70;--shadow:none;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#121110;--card:#1c1b19;--soft:#262421;--line:#33302c;--text:#f2efe9;--muted:#a39e95;--acc:#ff8a3d;--acc-ink:#1b0e04;--key:#25231f;--key2:#2e2b27;--op:#3a2416;--op-ink:#ffae74;--ok:#4ad08a;--red:#ff6b70;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 11px;min-width:0;color:var(--text)}
+input:focus,select:focus{outline:2px solid color-mix(in srgb,var(--acc) 45%,transparent);border-color:var(--acc)}
+a{color:inherit}
+h1,h2{letter-spacing:-.01em}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 13px;cursor:pointer;font-weight:600;text-align:center;white-space:nowrap}
+.btn:hover{background:var(--soft)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--red)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn.xs{padding:2px 8px;font-size:12px;border-radius:8px}
+.muted{color:var(--muted)}.small{font-size:13px}
+.sp{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.empty{padding:14px 4px;margin:0}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-in{padding:10px 24px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;text-decoration:none;flex:none}
+.logo{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#ff8a3d,#d9480f);color:#fff;font-size:18px;font-weight:800}
+.tabs{display:flex;gap:4px;flex:1;justify-content:center}
+.tab{border:0;background:none;border-radius:10px;padding:7px 14px;cursor:pointer;font-weight:600;color:var(--muted)}
+.tab:hover{background:var(--soft)}
+.tab.on{background:color-mix(in srgb,var(--acc) 15%,transparent);color:var(--acc)}
+.top-r{display:flex;align-items:center;gap:10px;flex:none}
+.sync{font-size:12px;color:var(--muted);white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:5px 11px;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap}
+.bnav{display:none}
+.main{padding:20px 24px 60px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.head h1{margin:0;font-size:24px}
+.head-r{display:flex;gap:8px;flex:1;justify-content:flex-end;min-width:260px}
+.head-r input{flex:1;max-width:420px}
+/* calculator */
+.main.v-calc{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:18px;align-items:start}
+.calc{padding:16px}
+.screen{background:var(--soft);border-radius:14px;padding:10px 14px 6px;margin-bottom:14px}
+.scr-top{display:flex;gap:6px;align-items:center;min-height:22px}
+.ind{font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);border-radius:6px;padding:1px 6px}
+.ind[hidden]{display:none}
+.preview{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:75%;font-variant-numeric:tabular-nums}
+.preview.err{color:var(--red)}
+.disp{width:100%;border:0!important;outline:0!important;background:none;text-align:right;font-size:40px;font-weight:600;padding:2px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.01em;caret-color:var(--acc)}
+.pads{display:grid;grid-template-columns:6fr 4fr;gap:14px}
+.sci{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;align-content:start}
+.basic{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.key{border:0;border-radius:12px;background:var(--key);cursor:pointer;font-weight:600;font-size:15px;height:52px;padding:0 2px;touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .05s,filter .1s}
+.key:hover{filter:brightness(.96)}
+:root[data-theme=dark] .key:hover{filter:brightness(1.15)}
+.key:active{transform:scale(.95)}
+.key.sk{background:var(--key2);font-size:14px;height:47px}
+.key.alt{color:var(--acc)}
+.key.on{background:var(--acc);color:var(--acc-ink)}
+.key.dig{background:var(--card);border:1px solid var(--line);font-size:21px;height:56px}
+.basic .key{height:56px;font-size:19px}
+.key.op{background:var(--op);color:var(--op-ink);font-size:22px}
+.key.fn{color:var(--red)}
+.key.eq{background:var(--acc);color:var(--acc-ink);font-size:24px}
+/* history */
+.hist{padding:14px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 110px);position:sticky;top:76px}
+.h-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.h-head h2{margin:0;font-size:16px}
+.h-list{overflow:auto;display:flex;flex-direction:column;gap:6px;min-height:60px}
+.h-row{padding:9px 11px;border-radius:12px;background:var(--soft);cursor:pointer;text-align:right}
+.h-row:hover{outline:1px solid var(--acc)}
+.h-e{color:var(--muted);font-size:13.5px;word-break:break-all}
+.h-r{font-weight:700;font-size:18px;word-break:break-all;font-variant-numeric:tabular-nums}
+.h-meta{display:flex;align-items:center;gap:5px;margin-top:2px}
+/* luas & volume */
+.main.v-geo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.geo-l{display:flex;flex-direction:column;gap:12px;min-width:0}
+.seg2{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;background:var(--soft);padding:5px;border-radius:14px}
+.seg2 button{border:0;background:none;padding:9px;border-radius:10px;font-weight:700;cursor:pointer;color:var(--muted)}
+.seg2 button.on{background:var(--card);box-shadow:var(--shadow);color:var(--acc)}
+.seg2.sm{padding:3px;border-radius:11px}.seg2.sm button{padding:6px;font-size:13.5px}
+.shape-pick{display:flex;gap:8px}
+.shape-pick select{flex:1;font-size:16px;padding:10px 12px;font-weight:600}
+.shape-pick .btn.on{border-color:var(--acc);color:var(--acc)}
+.cgs[hidden]{display:none}
+.cgs{display:flex;flex-direction:column;gap:8px}
+.cg-t{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:4px}
+.shp{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 9px;cursor:pointer;font-weight:600;font-size:13px;text-align:left;line-height:1.2}
+.shp span{font-size:16px;width:20px;text-align:center;flex:none}
+.shp:hover{border-color:var(--acc)}
+.shp.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card));color:var(--acc)}
+.fcard{padding:16px;display:flex;flex-direction:column;gap:12px}
+.f-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.f-head h2{margin:0;font-size:19px}
+.rumus{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--acc);margin-top:4px}
+.dg{width:190px;height:auto;flex:none;color:var(--text)}
+.dg .f1{fill:color-mix(in srgb,var(--acc) 18%,transparent);stroke:var(--acc);stroke-width:1.6;stroke-linejoin:round}
+.dg .f2{fill:color-mix(in srgb,var(--acc) 30%,transparent);stroke:var(--acc);stroke-width:1.6;stroke-linejoin:round}
+.dg .f3{fill:color-mix(in srgb,var(--acc) 8%,transparent);stroke:var(--acc);stroke-width:1.6;stroke-linejoin:round}
+.dg .hole{fill:var(--card);stroke:var(--acc);stroke-width:1.6}
+.dg .ln{fill:none;stroke:var(--acc);stroke-width:1;stroke-dasharray:3 3}
+.dg .dim{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3}
+.dg text{fill:var(--text);font:600 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.fopt{display:flex;flex-direction:column;gap:4px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fi{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;min-width:0}
+.fi.wide{grid-column:1/-1}
+.fi i{font-weight:500;font-style:normal}
+.fi-in{display:flex;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
+.fi-in:focus-within{outline:2px solid color-mix(in srgb,var(--acc) 45%,transparent);border-color:var(--acc)}
+.fi-in input{flex:1;border:0;outline:0!important;border-radius:0;font-size:16px;padding:9px 11px;font-variant-numeric:tabular-nums}
+.fi-in .u{border:0;border-left:1px solid var(--line);border-radius:0;background:var(--soft);font-size:13px;font-weight:700;padding:0 8px;width:62px;flex:none;outline:0}
+.fi-in .u.fixed{display:grid;place-items:center;color:var(--muted)}
+.fi.bad .fi-in{border-color:var(--red)}
+.ferr{color:var(--red);font-weight:500}
+.fi>input{font-size:16px}
+.tip{margin:0}
+.res-in{border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--acc) 10%,var(--card));border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);display:flex;flex-direction:column;gap:2px}
+.res-in.empty{background:var(--soft);border-color:var(--line)}
+.res-f{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;word-break:break-word}
+.res-big{font-size:30px;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums;line-height:1.2}
+.res-big small{font-size:17px}
+.f-act{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.f-act .btn{padding:11px}
+.geo-r{padding:16px;display:flex;flex-direction:column;gap:12px;position:sticky;top:76px;max-height:calc(100vh - 96px);overflow:auto}
+.doc-h{display:flex;gap:10px;align-items:flex-end}
+.doc-name{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.doc-name input{font-size:17px;font-weight:700;padding:9px 12px}
+.doc-act{display:flex;gap:6px}
+.tot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tot>div{background:var(--soft);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}
+.tot span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.tot b{font-size:22px;font-variant-numeric:tabular-nums}
+.tot small{color:var(--muted)}
+.lines{display:flex;flex-direction:column;gap:6px}
+.ln{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px}
+.ln.editing{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.ln-i{width:24px;height:24px;border-radius:7px;background:var(--soft);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted)}
+.ln-m{min-width:0;cursor:pointer}
+.ln-t{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ln-d{word-break:break-word}
+.ln-r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ln-r b{font-size:16px}
+.ln-r .u{padding:2px 4px;font-size:12px;border-radius:7px}
+.ln-a{display:flex;gap:3px}
+.recap summary{cursor:pointer;font-weight:600;font-size:14px}
+.recap table{width:100%;border-collapse:collapse;margin-top:6px}
+.recap td{padding:5px 4px;border-top:1px solid var(--line)}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* saved data */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.dcard{padding:14px;display:flex;flex-direction:column;gap:10px}
+.dcard.on{border-color:var(--acc)}
+.dc-m{cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.dc-n{font-weight:700;font-size:16.5px;word-break:break-word}
+.dc-t{display:flex;gap:16px;margin-top:4px;font-variant-numeric:tabular-nums}
+.dc-a{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dc-a .btn{padding:5px 4px;font-size:12.5px}
+.draft{padding:12px 14px;display:flex;flex-direction:column;cursor:pointer;margin-bottom:12px;border-style:dashed;border-color:var(--acc)}
+/* dialogs */
+dialog{border:0;padding:0;border-radius:18px;background:var(--card);color:var(--text);width:min(460px,calc(100vw - 24px));box-shadow:0 30px 80px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(10,8,5,.45)}
+.dlg{padding:20px;display:flex;flex-direction:column;gap:14px}
+.dlg h2{margin:0;word-break:break-word}
+.dlg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fld{display:flex;flex-direction:column;gap:8px}
+.fld>span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg.two-s{grid-template-columns:1fr 1fr}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0}
+.seg span{display:block;text-align:center;border:1px solid var(--line);border-radius:10px;padding:7px;cursor:pointer;font-weight:600}
+.seg input:checked+span{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dlg-f{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;align-items:center;gap:8px;font-weight:600}
+.check input{width:18px;height:18px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:14px;font-weight:600;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100vw - 32px);text-align:center}
+.toast[hidden]{display:none}
+/* gate (same as Planner, orange) */
+.gate{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:radial-gradient(1100px 700px at 10% 0%,#d9480f 0%,transparent 60%),radial-gradient(900px 600px at 100% 100%,#b8860b 0%,transparent 55%),linear-gradient(160deg,#2a160b,#120c08)}
+.gate-card{width:min(380px,100%);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:24px;padding:34px 26px 24px;text-align:center;color:#fff;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.gate .logo{width:68px;height:68px;border-radius:20px;font-size:34px;margin:0 auto 12px}
+.gate h1{margin:0;font-size:27px}
+.gate-sub{margin:4px 0 22px;color:rgba(255,255,255,.75)}
+.gate-field{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:4px 14px;text-align:left;margin-bottom:10px}
+.gate-field:focus-within{border-color:#ffc9a3;box-shadow:0 0 0 3px rgba(255,201,163,.3)}
+.gate-field input{flex:1;background:none;border:0;outline:0!important;color:#fff;font-size:16px;padding:10px 0}
+.gate-field input::placeholder{color:rgba(255,255,255,.6)}
+.mask-wrap{position:relative;flex:1;display:block;min-width:0}
+.mask-wrap input,#user-mask{font:500 17px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.04em;padding:10px 0}
+.mask-wrap input{width:100%;-webkit-text-fill-color:transparent;color:transparent;caret-color:#fff}
+.mask-wrap input::placeholder{-webkit-text-fill-color:rgba(255,255,255,.6);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:0}
+#user-mask{position:absolute;inset:0;pointer-events:none;color:#fff;white-space:pre;overflow:hidden}
+.gate-btn{width:100%;margin-top:4px;padding:12px;font-size:16px;font-weight:700;border-radius:14px;background:linear-gradient(135deg,#ff8a3d,#d9480f);border:0;color:#fff;cursor:pointer}
+.gate-btn:disabled{opacity:.7}
+.gate-err{color:#ffc2c2;min-height:18px;margin-top:10px;font-size:14px}
+.gate-note{color:rgba(255,255,255,.65);font-size:12.5px;margin:6px 0 0;line-height:1.5}
+.gate .check{justify-content:center;color:rgba(255,255,255,.85);font-weight:500;font-size:14px;margin:4px 0 10px}
+/* medium screens: calculator full width, history below */
+@media (max-width:1100px){
+  .main.v-calc{grid-template-columns:1fr}
+  .hist{position:static;max-height:none}
+}
+/* phones + small tablets */
+@media (max-width:820px){
+  .top-in{padding:8px 12px;gap:10px}
+  .tabs{display:none}
+  .top-r{margin-left:auto}
+  .main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
+  .bnav{display:grid;grid-template-columns:repeat(3,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+  .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;font-weight:600;color:var(--muted);padding:4px;border-radius:10px;cursor:pointer}
+  .bnav button span{font-size:20px}
+  .bnav button.on{color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+  .calc{padding:10px}
+  .screen{margin-bottom:10px}
+  .disp{font-size:34px}
+  .pads{grid-template-columns:1fr;gap:8px}
+  .sci,.basic{gap:6px}
+  .key.sk{height:40px;font-size:13.5px;border-radius:10px}
+  .basic .key{height:54px}
+  .main.v-geo{grid-template-columns:1fr}
+  .geo-r{position:static;max-height:none;overflow:visible}
+  .dg{width:130px}
+  .f-head h2{font-size:17px}
+  .ln{grid-template-columns:22px minmax(0,1fr) auto;row-gap:4px}
+  .ln-a{grid-column:2/-1;justify-content:flex-end}
+  .head-r{min-width:0;flex-basis:100%}
+  .head-r input{max-width:none}
+  .dgrid{grid-template-columns:1fr}
+  .sync{display:none}
+}
+@media (max-width:420px){
+  .fgrid{grid-template-columns:1fr 1fr}
+  .doc-h{flex-wrap:wrap}
+  .doc-name{flex-basis:100%}
+  .doc-act{width:100%;display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="app"><div style="padding:40px;font-family:sans-serif;color:#888">Memuat Calc…</div></div>
+<dialog id="dlg"></dialog>
+<noscript>Calc memerlukan JavaScript.</noscript>
+<script>// Calc — kalkulator scientific + luas (m²) & volume (m³) konstruksi. Akun (nama pengguna + PIN) sama dengan Planner & Notes; data di Supabase (proyek saku-yuk), sinkron real time.
+const BUILD = '20261004-203905';
+const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only cl_*/pl_* functions
+const ADMIN = 'admin';
+const HIST_MAX = 150;
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const LS = {
+  get: k => { try { return localStorage.getItem('calc.' + k); } catch { return null; } },
+  set: (k, v) => { try { localStorage.setItem('calc.' + k, v); } catch {} },
+  del: k => { try { localStorage.removeItem('calc.' + k); } catch {} }
+};
+const SS = { get: k => { try { return sessionStorage.getItem('calc.' + k); } catch { return null; } }, set: (k, v) => { try { sessionStorage.setItem('calc.' + k, v); } catch {} }, del: k => { try { sessionStorage.removeItem('calc.' + k); } catch {} } };
+const normUser = s => String(s ?? '').trim().toLowerCase();
+const validUser = s => /^[a-z0-9._-]{3,32}$/.test(s);
+const pad = n => String(n).padStart(2, '0');
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const hms = d => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const fullDT = t => { const d = new Date(t); return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const rid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const clone = o => JSON.parse(JSON.stringify(o));
+
+// number display (setting: Indonesia 1.234,56 or international 1,234.56)
+const loc = () => LS.get('dec') === 'en' ? 'en-US' : 'id-ID';
+const N = (x, d = 4) => Number.isFinite(x) ? x.toLocaleString(loc(), { maximumFractionDigits: d }) : '—';
+const R = (x, d = 3) => Number.isFinite(x) ? x.toLocaleString(loc(), { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+
+// ---------- expression engine (no eval) ----------
+const FUNCS = ['asinh', 'acosh', 'atanh', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'sin', 'cos', 'tan', 'log2', 'log', 'ln', 'exp', 'abs', 'sqrt', 'cbrt', 'root', 'nPr', 'nCr', 'round', 'floor', 'ceil'];
+const CONSTS = ['Ans', 'rand', 'pi', 'e'];
+const ID_RE = new RegExp('^(' + [...FUNCS, 'mod', ...CONSTS].join('|') + ')');
+function tokenize(s) {
+  const out = []; let i = 0;
+  while (i < s.length) {
+    const c = s[i], rest = s.slice(i);
+    if (/\s/.test(c)) { i++; continue; }
+    let m = /^(?:\d+\.?\d*|\.\d+)(?:E[+\-−]?\d+)?/.exec(rest);
+    if (m) { out.push({ t: 'num', v: parseFloat(m[0].replace('−', '-')) }); i += m[0].length; continue; }
+    m = ID_RE.exec(rest);
+    if (m) { out.push({ t: FUNCS.includes(m[1]) ? 'fn' : m[1] === 'mod' ? 'op' : 'const', v: m[1] }); i += m[1].length; continue; }
+    const map = { '−': '-', '–': '-', '*': '×', '·': '×', 'x': '×', '/': '÷', ':': '÷', 'π': 'pi', '√': '√', '∛': '∛' };
+    const v = map[c] || c;
+    if (v === 'pi') out.push({ t: 'const', v: 'pi' });
+    else if ('√∛'.includes(v)) out.push({ t: 'fn', v: v === '√' ? 'sqrt' : 'cbrt', pre: true });
+    else if ('+-×÷^()!%²³,'.includes(v)) out.push({ t: 'op', v });
+    else throw new Error('Karakter tidak dikenal: ' + c);
+    i++;
+  }
+  return out;
+}
+function fact(n) {
+  if (n < 0 || !Number.isInteger(n)) throw new Error('Faktorial hanya untuk bilangan bulat ≥ 0');
+  if (n > 170) return Infinity;
+  let r = 1; for (let k = 2; k <= n; k++) r *= k; return r;
+}
+const nCr = (n, r) => { if (!Number.isInteger(n) || !Number.isInteger(r) || r < 0 || n < 0 || r > n) throw new Error('nCr: n ≥ r ≥ 0, bulat'); r = Math.min(r, n - r); let x = 1; for (let k = 1; k <= r; k++) x = x * (n - r + k) / k; return Math.round(x); };
+const nPr = (n, r) => { if (!Number.isInteger(n) || !Number.isInteger(r) || r < 0 || n < 0 || r > n) throw new Error('nPr: n ≥ r ≥ 0, bulat'); let x = 1; for (let k = 0; k < r; k++) x *= n - k; return x; };
+function evaluate(src, opt = {}) {
+  const deg = opt.deg ?? true, ans = opt.ans ?? 0;
+  const toks = tokenize(String(src)); let i = 0;
+  if (!toks.length) throw new Error('Kosong');
+  const peek = () => toks[i], isOp = (v, t = toks[i]) => t && t.t === 'op' && t.v === v;
+  const tidy = x => Math.abs(x) < 1e-14 ? 0 : x;
+  const inR = x => deg ? x * Math.PI / 180 : x, outR = x => deg ? x * 180 / Math.PI : x;
+  const trig = (f, x) => { if (f === 'tan' && deg && Math.abs(((x % 180) + 180) % 180 - 90) < 1e-12) throw new Error('tan tidak terdefinisi'); return tidy(Math[f](inR(x))); };
+  const F = {
+    sin: x => trig('sin', x), cos: x => trig('cos', x), tan: x => trig('tan', x),
+    asin: x => outR(Math.asin(x)), acos: x => outR(Math.acos(x)), atan: x => outR(Math.atan(x)),
+    sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh, asinh: Math.asinh, acosh: Math.acosh, atanh: Math.atanh,
+    log: Math.log10, ln: Math.log, log2: Math.log2, exp: Math.exp, abs: Math.abs, sqrt: Math.sqrt, cbrt: Math.cbrt,
+    root: (x, y) => { if (x < 0 && Math.abs(y % 2) === 1) return -Math.pow(-x, 1 / y); return Math.pow(x, 1 / y); },
+    nPr, nCr, round: (x, d = 0) => Math.round(x * 10 ** d) / 10 ** d, floor: Math.floor, ceil: Math.ceil
+  };
+  const starts = t => t && (t.t === 'num' || t.t === 'const' || t.t === 'fn' || (t.t === 'op' && t.v === '('));
+  function expr() {
+    let a = term()[0];
+    while (isOp('+') || isOp('-')) {
+      const op = toks[i++].v; let [b, pct] = term();
+      if (pct) b = a * b; // 200 + 10% = 220
+      a = op === '+' ? a + b : a - b;
+    }
+    return a;
+  }
+  function term() {
+    let a = unary(), n = 1;
+    for (;;) {
+      if (isOp('×') || isOp('÷') || isOp('mod')) {
+        const op = toks[i++].v, b = unary(); n++;
+        a = op === '×' ? a * b : op === '÷' ? a / b : ((a % b) + b) % b;
+      } else if (starts(peek())) { a *= unary(); n++; } // implicit: 2π, 3(4), 2sin(30)
+      else break;
+    }
+    return [a, n === 1 && isOp('%', toks[i - 1])];
+  }
+  function unary() {
+    if (isOp('-')) { i++; return -unary(); }
+    if (isOp('+')) { i++; return unary(); }
+    return power();
+  }
+  function power() {
+    const b = postfix();
+    if (isOp('^')) { i++; return Math.pow(b, unary()); }
+    return b;
+  }
+  function postfix() {
+    let v = primary();
+    for (;;) {
+      if (isOp('!')) { i++; v = fact(v); }
+      else if (isOp('%')) { i++; v = v / 100; }
+      else if (isOp('²')) { i++; v = v * v; }
+      else if (isOp('³')) { i++; v = v * v * v; }
+      else return v;
+    }
+  }
+  function close() { if (isOp(')')) i++; else if (i < toks.length) throw new Error('Kurung tidak lengkap'); } // missing ")" at the end is fine
+  function primary() {
+    const t = toks[i++];
+    if (!t) throw new Error('Ekspresi belum lengkap');
+    if (t.t === 'num') return t.v;
+    if (t.t === 'const') return t.v === 'pi' ? Math.PI : t.v === 'e' ? Math.E : t.v === 'Ans' ? ans : Math.random();
+    if (t.t === 'op' && t.v === '(') { const v = expr(); close(); return v; }
+    if (t.t === 'fn') {
+      if (!isOp('(')) return F[t.v](t.pre ? unary() : power()); // √9, sin30
+      i++; const args = [expr()]; while (isOp(',')) { i++; args.push(expr()); } close();
+      return F[t.v](...args);
+    }
+    throw new Error(t.v === ')' ? 'Kurung tutup berlebih' : `"${t.v}" tidak di tempatnya`);
+  }
+  const v = expr();
+  if (i < toks.length) throw new Error(isOp(')') ? 'Kurung tutup berlebih' : 'Ekspresi tidak valid');
+  if (Number.isNaN(v)) throw new Error('Hasil tidak terdefinisi');
+  if (!Number.isFinite(v)) throw new Error(v > 0 ? 'Tak hingga' : '−Tak hingga');
+  return v;
+}
+const fmtCalc = x => { const s = String(Number(x.toPrecision(15))); return s.replace('e', 'E'); };
+
+// dimension inputs: accept "0,4", "40", "2*1,5", "3+0.25"
+function numIn(raw) {
+  const s = String(raw ?? '').trim(); if (!s) return null;
+  const v = evaluate(s.replace(/,/g, '.'), { deg: true });
+  return v;
+}
+
+// ---------- shapes (luas m² & volume m³) ----------
+const UNITS = { m: 1, cm: 0.01, mm: 0.001 };
+const L = (k, l, o = {}) => ({ k, l, t: 'len', ...o }), CNT = (k, l, o = {}) => ({ k, l, t: 'n', ...o }), AR = (k, l, o = {}) => ({ k, l, t: 'area', ...o }), DG = (k, l, o = {}) => ({ k, l, t: 'deg', ...o });
+const PI4 = Math.PI / 4;
+const SHAPES = [
+  // volume — struktur beton
+  { id: 'kolom', cat: 'vol', g: 'Struktur beton', n: 'Kolom', ic: '🏛', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang penampang'), L('l', 'l — lebar penampang'), L('t', 't — tinggi kolom')], rumus: 'V = p × l × t', c: v => [v.p * v.l * v.t, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
+  { id: 'balok', cat: 'vol', g: 'Struktur beton', n: 'Balok', ic: '▬', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang balok'), L('l', 'l — lebar balok'), L('t', 't — tinggi balok')], rumus: 'V = p × l × t', c: v => [v.p * v.l * v.t, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
+  { id: 'sloof', cat: 'vol', g: 'Struktur beton', n: 'Sloof', ic: '═', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang sloof'), L('l', 'l — lebar'), L('t', 't — tinggi')], rumus: 'V = p × l × t', c: v => [v.p * v.l * v.t, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
+  { id: 'ringbalk', cat: 'vol', g: 'Struktur beton', n: 'Ring balok', ic: '▭', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('t', 't — tinggi')], rumus: 'V = p × l × t', c: v => [v.p * v.l * v.t, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
+  { id: 'plat', cat: 'vol', g: 'Struktur beton', n: 'Plat lantai / dak', ic: '⬜', svg: ['box', 'p', 'l', 'tb'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('tb', 'tb — tebal plat')], rumus: 'V = p × l × tb', c: v => [v.p * v.l * v.tb, `${N(v.p)} × ${N(v.l)} × ${N(v.tb)}`] },
+  { id: 'footplat', cat: 'vol', g: 'Struktur beton', n: 'Pondasi footplat', ic: '⊥', svg: ['foot'], f: [L('p', 'p — panjang plat'), L('l', 'l — lebar plat'), L('t', 't — tebal plat'), L('pk', 'pk — panjang pedestal', { opt: 1 }), L('lk', 'lk — lebar pedestal', { opt: 1 }), L('tk', 'tk — tinggi pedestal', { opt: 1 })], rumus: 'V = p × l × t + pk × lk × tk', c: v => { const a = v.p * v.l * v.t, b = (v.pk || 0) * (v.lk || 0) * (v.tk || 0); return [a + b, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}` + (b ? ` + ${N(v.pk)} × ${N(v.lk)} × ${N(v.tk)}` : '')]; } },
+  { id: 'borepile', cat: 'vol', g: 'Struktur beton', n: 'Bore pile / tiang bulat', ic: '🛢', svg: ['cyl', 'd', 't'], f: [L('d', 'd — diameter'), L('t', 't — panjang / kedalaman')], rumus: 'V = ¼ π × d² × t', c: v => [PI4 * v.d * v.d * v.t, `¼π × ${N(v.d)}² × ${N(v.t)}`] },
+  { id: 'uditch', cat: 'vol', g: 'Saluran', n: 'U-Ditch', ic: '⊔', svg: ['ud'], f: [L('p', 'p — panjang saluran'), L('l', 'l — lebar'), L('t', 't — tinggi'), L('tb', 'tb — tebal dinding & lantai')],
+    opts: [{ k: 'mode', l: 'Ukuran l & t diukur dari', o: [['luar', 'Luar (beton)'], ['dalam', 'Dalam (saluran)']] }], rumus: 'V = p × (l × t − (l − 2tb) × (t − tb))',
+    c: (v, o) => { const Lw = o.mode === 'dalam' ? v.l + 2 * v.tb : v.l, T = o.mode === 'dalam' ? v.t + v.tb : v.t, li = Lw - 2 * v.tb, ti = T - v.tb;
+      if (li <= 0 || ti <= 0) throw new Error('Tebal terlalu besar untuk lebar/tinggi ini');
+      return [v.p * (Lw * T - li * ti), `${N(v.p)} × (${N(Lw)} × ${N(T)} − ${N(li)} × ${N(ti)})`]; } },
+  { id: 'cover', cat: 'vol', g: 'Saluran', n: 'Cover / tutup U-Ditch', ic: '▔', svg: ['box', 'p', 'l', 'tb'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('tb', 'tb — tebal')], rumus: 'V = p × l × tb', c: v => [v.p * v.l * v.tb, `${N(v.p)} × ${N(v.l)} × ${N(v.tb)}`] },
+  { id: 'boxc', cat: 'vol', g: 'Saluran', n: 'Box culvert', ic: '▣', svg: ['bc'], f: [L('p', 'p — panjang'), L('l', 'l — lebar luar'), L('t', 't — tinggi luar'), L('tb', 'tb — tebal dinding')], rumus: 'V = p × (l × t − (l − 2tb) × (t − 2tb))',
+    c: v => { const li = v.l - 2 * v.tb, ti = v.t - 2 * v.tb; if (li <= 0 || ti <= 0) throw new Error('Tebal terlalu besar untuk ukuran ini'); return [v.p * (v.l * v.t - li * ti), `${N(v.p)} × (${N(v.l)} × ${N(v.t)} − ${N(li)} × ${N(ti)})`]; } },
+  { id: 'buis', cat: 'vol', g: 'Saluran', n: 'Buis beton / pipa', ic: '◎', svg: ['pipe'], f: [L('D', 'D — diameter luar'), L('tb', 'tb — tebal dinding'), L('p', 'p — panjang')], rumus: 'V = ¼ π × (D² − (D − 2tb)²) × p',
+    c: v => { const di = v.D - 2 * v.tb; if (di < 0) throw new Error('Tebal terlalu besar untuk diameter ini'); return [PI4 * (v.D * v.D - di * di) * v.p, `¼π × (${N(v.D)}² − ${N(di)}²) × ${N(v.p)}`]; } },
+  { id: 'saltrap', cat: 'vol', g: 'Saluran', n: 'Saluran trapesium (pasangan)', ic: '⏢', svg: ['trapch'], f: [L('p', 'p — panjang saluran'), L('b', 'b — lebar dasar dalam'), L('h', 'h — tinggi saluran'), L('m', 'm — lebar miring tiap sisi (horizontal)'), L('tb', 'tb — tebal pasangan')],
+    rumus: 'V = p × tb × (b + 2·√(h² + m²))', c: v => { const s = Math.sqrt(v.h * v.h + v.m * v.m); return [v.p * v.tb * (v.b + 2 * s), `${N(v.p)} × ${N(v.tb)} × (${N(v.b)} + 2 × ${N(s)})`]; } },
+  { id: 'tangga', cat: 'vol', g: 'Struktur beton', n: 'Tangga beton', ic: '🪜', svg: ['stair'], f: [L('b', 'b — lebar tangga'), L('o', 'o — optrede (tinggi anak tangga)'), L('a', 'a — antrede (lebar injakan)'), CNT('n', 'n — jumlah anak tangga'), L('tb', 'tb — tebal plat tangga')],
+    rumus: 'V = b × n × (o × a / 2 + tb × √(o² + a²))', c: v => { const s = Math.sqrt(v.o * v.o + v.a * v.a); return [v.b * v.n * (v.o * v.a / 2 + v.tb * s), `${N(v.b)} × ${N(v.n)} × (${N(v.o)} × ${N(v.a)} / 2 + ${N(v.tb)} × ${N(s)})`]; } },
+  { id: 'dinding', cat: 'vol', g: 'Struktur beton', n: 'Dinding beton / pasangan', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), L('tb', 'tb — tebal dinding'), AR('bk', 'Bukaan pintu/jendela (m²)', { opt: 1 })],
+    rumus: 'V = (p × t − bukaan) × tb', c: v => [(v.p * v.t - (v.bk || 0)) * v.tb, `(${N(v.p)} × ${N(v.t)}${v.bk ? ' − ' + N(v.bk) : ''}) × ${N(v.tb)}`] },
+  // volume — tanah & pondasi
+  { id: 'galian', cat: 'vol', g: 'Tanah & pondasi', n: 'Galian / urugan trapesium', ic: '⛏', svg: ['trap', 'la', 'lb', 't'], f: [L('p', 'p — panjang galian'), L('la', 'la — lebar atas'), L('lb', 'lb — lebar bawah'), L('t', 't — kedalaman')], rumus: 'V = (la + lb) / 2 × t × p', c: v => [(v.la + v.lb) / 2 * v.t * v.p, `(${N(v.la)} + ${N(v.lb)}) / 2 × ${N(v.t)} × ${N(v.p)}`] },
+  { id: 'galiank', cat: 'vol', g: 'Tanah & pondasi', n: 'Galian / urugan kotak', ic: '⛏', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('t', 't — kedalaman / tebal')], rumus: 'V = p × l × t', c: v => [v.p * v.l * v.t, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
+  { id: 'batukali', cat: 'vol', g: 'Tanah & pondasi', n: 'Pondasi batu kali', ic: '⏢', svg: ['trap', 'a', 'b', 't'], f: [L('p', 'p — panjang pondasi'), L('a', 'a — lebar atas'), L('b', 'b — lebar bawah'), L('t', 't — tinggi')], rumus: 'V = (a + b) / 2 × t × p', c: v => [(v.a + v.b) / 2 * v.t * v.p, `(${N(v.a)} + ${N(v.b)}) / 2 × ${N(v.t)} × ${N(v.p)}`] },
+  { id: 'lantaikerja', cat: 'vol', g: 'Tanah & pondasi', n: 'Lantai kerja / pasir urug', ic: '▁', svg: ['box', 'p', 'l', 'tb'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('tb', 'tb — tebal')], rumus: 'V = p × l × tb', c: v => [v.p * v.l * v.tb, `${N(v.p)} × ${N(v.l)} × ${N(v.tb)}`] },
+  // volume — bangun ruang lainnya
+  { id: 'kotak', cat: 'vol', g: 'Bangun ruang', n: 'Balok / kotak', ic: '📦', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('t', 't — tinggi')], rumus: 'V = p × l × t', c: v => [v.p * v.l * v.t, `${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
+  { id: 'kubus', cat: 'vol', g: 'Bangun ruang', n: 'Kubus', ic: '🧊', svg: ['box', 's', 's', 's'], f: [L('s', 's — sisi')], rumus: 'V = s³', c: v => [v.s ** 3, `${N(v.s)}³`] },
+  { id: 'tabung', cat: 'vol', g: 'Bangun ruang', n: 'Tabung', ic: '🥫', svg: ['cyl', 'd', 't'], f: [L('d', 'd — diameter'), L('t', 't — tinggi')], rumus: 'V = ¼ π × d² × t', c: v => [PI4 * v.d * v.d * v.t, `¼π × ${N(v.d)}² × ${N(v.t)}`] },
+  { id: 'kerucut', cat: 'vol', g: 'Bangun ruang', n: 'Kerucut', ic: '🔺', svg: ['cone'], f: [L('d', 'd — diameter alas'), L('t', 't — tinggi')], rumus: 'V = ⅓ × ¼ π × d² × t', c: v => [PI4 * v.d * v.d * v.t / 3, `⅓ × ¼π × ${N(v.d)}² × ${N(v.t)}`] },
+  { id: 'terpancung', cat: 'vol', g: 'Bangun ruang', n: 'Kerucut terpancung', ic: '⏚', svg: ['frustum'], f: [L('D1', 'D1 — diameter bawah'), L('D2', 'D2 — diameter atas'), L('t', 't — tinggi')], rumus: 'V = π t / 12 × (D1² + D1·D2 + D2²)', c: v => [Math.PI * v.t / 12 * (v.D1 ** 2 + v.D1 * v.D2 + v.D2 ** 2), `π × ${N(v.t)} / 12 × (${N(v.D1)}² + ${N(v.D1)}×${N(v.D2)} + ${N(v.D2)}²)`] },
+  { id: 'bola', cat: 'vol', g: 'Bangun ruang', n: 'Bola', ic: '⚪', svg: ['sphere'], f: [L('d', 'd — diameter')], rumus: 'V = π / 6 × d³', c: v => [Math.PI / 6 * v.d ** 3, `π / 6 × ${N(v.d)}³`] },
+  { id: 'limas', cat: 'vol', g: 'Bangun ruang', n: 'Limas segi empat', ic: '◭', svg: ['pyr'], f: [L('p', 'p — panjang alas'), L('l', 'l — lebar alas'), L('t', 't — tinggi')], rumus: 'V = ⅓ × p × l × t', c: v => [v.p * v.l * v.t / 3, `⅓ × ${N(v.p)} × ${N(v.l)} × ${N(v.t)}`] },
+  { id: 'prisma', cat: 'vol', g: 'Bangun ruang', n: 'Prisma segitiga', ic: '⛺', svg: ['prism'], f: [L('a', 'a — alas segitiga'), L('ts', 'ts — tinggi segitiga'), L('p', 'p — panjang prisma')], rumus: 'V = ½ × a × ts × p', c: v => [v.a * v.ts * v.p / 2, `½ × ${N(v.a)} × ${N(v.ts)} × ${N(v.p)}`] },
+  // luas
+  { id: 'persegipjg', cat: 'area', g: 'Bidang datar', n: 'Persegi panjang', ic: '▭', svg: ['rect', 'p', 'l'], f: [L('p', 'p — panjang'), L('l', 'l — lebar')], rumus: 'A = p × l', c: v => [v.p * v.l, `${N(v.p)} × ${N(v.l)}`] },
+  { id: 'persegi', cat: 'area', g: 'Bidang datar', n: 'Persegi', ic: '◻', svg: ['rect', 's', 's'], f: [L('s', 's — sisi')], rumus: 'A = s²', c: v => [v.s * v.s, `${N(v.s)}²`] },
+  { id: 'segitiga', cat: 'area', g: 'Bidang datar', n: 'Segitiga', ic: '△', svg: ['tri'], f: [L('a', 'a — alas'), L('t', 't — tinggi')], rumus: 'A = ½ × a × t', c: v => [v.a * v.t / 2, `½ × ${N(v.a)} × ${N(v.t)}`] },
+  { id: 'trapesium', cat: 'area', g: 'Bidang datar', n: 'Trapesium', ic: '⏢', svg: ['trap', 'a', 'b', 't'], f: [L('a', 'a — sisi atas'), L('b', 'b — sisi bawah'), L('t', 't — tinggi')], rumus: 'A = (a + b) / 2 × t', c: v => [(v.a + v.b) / 2 * v.t, `(${N(v.a)} + ${N(v.b)}) / 2 × ${N(v.t)}`] },
+  { id: 'lingkaran', cat: 'area', g: 'Bidang datar', n: 'Lingkaran', ic: '○', svg: ['circ'], f: [L('d', 'd — diameter')], rumus: 'A = ¼ π × d²', c: v => [PI4 * v.d * v.d, `¼π × ${N(v.d)}²`] },
+  { id: 'jajar', cat: 'area', g: 'Bidang datar', n: 'Jajar genjang', ic: '▱', svg: ['para'], f: [L('a', 'a — alas'), L('t', 't — tinggi')], rumus: 'A = a × t', c: v => [v.a * v.t, `${N(v.a)} × ${N(v.t)}`] },
+  { id: 'ketupat', cat: 'area', g: 'Bidang datar', n: 'Belah ketupat / layang-layang', ic: '◇', svg: ['kite'], f: [L('d1', 'd1 — diagonal 1'), L('d2', 'd2 — diagonal 2')], rumus: 'A = ½ × d1 × d2', c: v => [v.d1 * v.d2 / 2, `½ × ${N(v.d1)} × ${N(v.d2)}`] },
+  { id: 'dindingluas', cat: 'area', g: 'Konstruksi', n: 'Dinding / plester / cat', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), AR('bk', 'Bukaan pintu/jendela (m²)', { opt: 1 }), CNT('s', 'Jumlah sisi (1 atau 2)', { opt: 1 })],
+    rumus: 'A = (p × t − bukaan) × sisi', c: v => { const s = v.s || 1; return [(v.p * v.t - (v.bk || 0)) * s, `(${N(v.p)} × ${N(v.t)}${v.bk ? ' − ' + N(v.bk) : ''})${s !== 1 ? ' × ' + N(s) : ''}`]; } },
+  { id: 'lantai', cat: 'area', g: 'Konstruksi', n: 'Lantai / keramik', ic: '🔲', svg: ['rect', 'p', 'l'], f: [L('p', 'p — panjang ruang'), L('l', 'l — lebar ruang')], rumus: 'A = p × l', c: v => [v.p * v.l, `${N(v.p)} × ${N(v.l)}`] },
+  { id: 'bkkolom', cat: 'area', g: 'Konstruksi', n: 'Bekisting kolom', ic: '🏛', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang penampang'), L('l', 'l — lebar penampang'), L('t', 't — tinggi kolom')], rumus: 'A = 2 × (p + l) × t', c: v => [2 * (v.p + v.l) * v.t, `2 × (${N(v.p)} + ${N(v.l)}) × ${N(v.t)}`] },
+  { id: 'bkbalok', cat: 'area', g: 'Konstruksi', n: 'Bekisting balok', ic: '▬', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang balok'), L('l', 'l — lebar (alas)'), L('t', 't — tinggi sisi')], rumus: 'A = (l + 2t) × p', c: v => [(v.l + 2 * v.t) * v.p, `(${N(v.l)} + 2 × ${N(v.t)}) × ${N(v.p)}`] },
+  { id: 'bkplat', cat: 'area', g: 'Konstruksi', n: 'Bekisting plat', ic: '⬜', svg: ['rect', 'p', 'l'], f: [L('p', 'p — panjang'), L('l', 'l — lebar'), L('tb', 'tb — tebal plat (untuk sisi tepi)', { opt: 1 })], rumus: 'A = p × l + 2 × (p + l) × tb', c: v => { const e = 2 * (v.p + v.l) * (v.tb || 0); return [v.p * v.l + e, `${N(v.p)} × ${N(v.l)}` + (e ? ` + 2 × (${N(v.p)} + ${N(v.l)}) × ${N(v.tb)}` : '')]; } },
+  { id: 'atap', cat: 'area', g: 'Konstruksi', n: 'Atap miring', ic: '⌂', svg: ['roof'], f: [L('p', 'p — panjang atap (horizontal)'), L('l', 'l — lebar bidang (horizontal)'), DG('a', 'Sudut kemiringan (°)')], rumus: 'A = p × l / cos(sudut)',
+    c: v => { if (v.a >= 90) throw new Error('Sudut harus < 90°'); const c = Math.cos(v.a * Math.PI / 180); return [v.p * v.l / c, `${N(v.p)} × ${N(v.l)} / cos ${N(v.a)}°`]; } },
+  { id: 'selimut', cat: 'area', g: 'Konstruksi', n: 'Selimut tabung', ic: '🥫', svg: ['cyl', 'd', 't'], f: [L('d', 'd — diameter'), L('t', 't — tinggi')], rumus: 'A = π × d × t', c: v => [Math.PI * v.d * v.t, `π × ${N(v.d)} × ${N(v.t)}`] }
+];
+const chipsOpen = () => LS.get('chips') === '1';
+const SMAP = new Map(SHAPES.map(s => [s.id, s]));
+const UNIT_TXT = { vol: 'm³', area: 'm²' };
+
+// ---------- diagrams ----------
+function svgFor(sh) {
+  const [k, a, b, c] = sh.svg || [];
+  const T = (x, y, t, anc = 'middle') => `<text x="${x}" y="${y}" text-anchor="${anc}">${esc(t)}</text>`;
+  const W = inner => `<svg viewBox="0 0 220 150" class="dg" role="img" aria-label="Gambar ${esc(sh.n)}">${inner}</svg>`;
+  switch (k) {
+    case 'box': return W(`<path class="f1" d="M40 55h100v70H40z"/><path class="f2" d="M40 55l30-25h100l-30 25z"/><path class="f3" d="M140 55l30-25v70l-30 25z"/>${T(90, 142, a)}${T(166, 118, b, 'start')}${T(30, 95, c, 'end')}`);
+    case 'foot': return W(`<path class="f1" d="M30 100h120v30H30z"/><path class="f2" d="M30 100l30-20h120l-30 20z"/><path class="f3" d="M150 100l30-20v30l-30 20z"/><path class="f1" d="M85 40h30v50H85z"/><path class="f2" d="M85 40l12-8h30l-12 8z"/><path class="f3" d="M115 40l12-8v50l-12 8z"/>${T(90, 145, 'p')}${T(170, 128, 'l', 'start')}${T(24, 120, 't', 'end')}${T(78, 70, 'tk', 'end')}${T(100, 28, 'pk · lk')}`);
+    case 'cyl': return W(`<path class="f1" d="M70 35v85a40 12 0 0 0 80 0V35"/><ellipse class="f2" cx="110" cy="35" rx="40" ry="12"/><path class="ln" d="M70 35h80"/>${T(110, 28, a)}${T(160, 85, b, 'start')}`);
+    case 'cone': return W(`<path class="f1" d="M110 20L65 118a45 12 0 0 0 90 0z"/><path class="ln" d="M110 20v98M65 118h90"/>${T(110, 145, 'd')}${T(116, 75, 't', 'start')}`);
+    case 'frustum': return W(`<path class="f1" d="M85 35L60 115a50 13 0 0 0 100 0L135 35"/><ellipse class="f2" cx="110" cy="35" rx="25" ry="7"/>${T(110, 25, 'D2')}${T(110, 145, 'D1')}${T(158, 80, 't', 'start')}`);
+    case 'sphere': return W(`<circle class="f1" cx="110" cy="75" r="55"/><ellipse class="ln" cx="110" cy="75" rx="55" ry="15"/><path class="ln" d="M55 75h110"/>${T(110, 68, 'd')}`);
+    case 'pyr': return W(`<path class="f1" d="M50 115l50 15 70-30-60-75z"/><path class="ln" d="M50 115l60-90M100 130l10-105"/>${T(70, 140, 'p')}${T(146, 128, 'l', 'start')}${T(120, 70, 't', 'start')}`);
+    case 'prism': return W(`<path class="f1" d="M40 120h80l-40-70z"/><path class="f3" d="M120 120l60-35-40-70-60 35"/><path class="ln" d="M80 50v70"/>${T(80, 140, 'a')}${T(86, 95, 'ts', 'start')}${T(160, 112, 'p', 'start')}`);
+    case 'ud': return W(`<path class="f1" d="M40 20v105h140V20h-18v87H58V20z"/><path class="dim" d="M40 138h140M28 20v105M58 30h-18M40 116h0"/>${T(110, 150, 'l')}${T(22, 76, 't', 'end')}${T(49, 15, 'tb')}${T(110, 70, 'saluran')}${T(110, 86, '× p (panjang)')}`);
+    case 'bc': return W(`<path class="f1" fill-rule="evenodd" d="M40 20h140v105H40zM58 38h104v69H58z"/><path class="dim" d="M40 138h140M28 20v105"/>${T(110, 150, 'l')}${T(22, 76, 't', 'end')}${T(49, 15, 'tb')}${T(110, 76, '× p (panjang)')}`);
+    case 'pipe': return W(`<circle class="f1" cx="100" cy="75" r="58"/><circle class="hole" cx="100" cy="75" r="44"/><path class="dim" d="M42 75h116"/>${T(100, 68, 'D')}${T(150, 30, 'tb', 'start')}${T(170, 132, '× p', 'start')}`);
+    case 'trap': return W(`<path class="f1" d="M30 30h160l-40 90H70z"/>${T(110, 22, a)}${T(110, 140, b)}${T(184, 80, c, 'start')}`);
+    case 'trapch': return W(`<path class="f1" d="M20 30h20l35 75h70l35-75h20l-42 92H62z"/>${T(110, 136, 'b')}${T(30, 70, 'h', 'end')}${T(58, 24, 'm')}${T(196, 66, 'tb', 'start')}${T(110, 60, '× p (panjang)')}`);
+    case 'stair': return W(`<path class="f1" d="M30 125h30v-20h25v-20h25v-20h25v-20h25v-20h25v20l-130 100"/>${T(72, 120, 'a')}${T(55, 100, 'o', 'end')}${T(130, 120, 'tb', 'start')}${T(170, 140, '× b (lebar)')}`);
+    case 'wall': return W(`<path class="f1" fill-rule="evenodd" d="M30 25h160v100H30zM55 60h30v65H55zM120 55h45v35h-45z"/>${T(110, 142, 'p')}${T(22, 78, 't', 'end')}${T(142, 76, 'bukaan')}`);
+    case 'rect': return W(`<path class="f1" d="M45 30h130v90H45z"/>${T(110, 140, a)}${T(36, 79, b, 'end')}`);
+    case 'tri': return W(`<path class="f1" d="M30 120h160L90 25z"/><path class="dim" d="M90 25v95"/>${T(110, 140, 'a')}${T(96, 85, 't', 'start')}`);
+    case 'circ': return W(`<circle class="f1" cx="110" cy="75" r="55"/><path class="dim" d="M55 75h110"/>${T(110, 68, 'd')}`);
+    case 'para': return W(`<path class="f1" d="M60 30h140l-40 90H20z"/><path class="dim" d="M60 30v90"/>${T(90, 140, 'a')}${T(66, 80, 't', 'start')}`);
+    case 'kite': return W(`<path class="f1" d="M110 15l70 60-70 60-70-60z"/><path class="dim" d="M40 75h140M110 15v120"/>${T(150, 70, 'd1')}${T(116, 40, 'd2', 'start')}`);
+    case 'roof': return W(`<path class="f1" d="M20 110l90-70 90 70z"/><path class="dim" d="M20 120h180M110 40v70"/>${T(110, 138, 'l (horizontal)')}${T(48, 104, 'sudut', 'start')}`);
+  }
+  return '';
+}
+
+// ---------- state ----------
+const S = {
+  user: null, admin: false, pass: '', users: [], pin: '', hasPin: false, gate: null,
+  items: new Map(), seq: 0, queue: new Set(),
+  view: LS.get('view') || 'calc',
+  expr: '', ans: Number(LS.get('ans') || 0) || 0, justEval: false, deg: LS.get('deg') !== 'rad', second: false, mem: Number(LS.get('mem') || 0) || 0, err: '', caret: null,
+  cat: LS.get('cat') || 'vol', shape: LS.get('shape') || 'kolom', forms: {}, edit: null,
+  curId: null, draft: null, q: '', calcQ: '',
+  sync: { busy: false, again: false, at: null, err: '' }
+};
+const RO = () => S.admin;
+const key = it => it.owner + '/' + it.id;
+const cacheKey = () => S.admin ? 'admin' : 'u.' + S.user;
+const owner = () => S.admin ? '' : S.user;
+
+function saveCache() {
+  LS.set(cacheKey() + '.items', JSON.stringify([...S.items.values()]));
+  LS.set(cacheKey() + '.seq', String(S.seq));
+  if (!S.admin) LS.set(cacheKey() + '.queue', JSON.stringify([...S.queue]));
+}
+function loadCache() {
+  S.items = new Map(); S.queue = new Set(); S.seq = 0;
+  try { for (const it of JSON.parse(LS.get(cacheKey() + '.items') || '[]')) S.items.set(key(it), it); } catch {}
+  S.seq = Number(LS.get(cacheKey() + '.seq') || 0);
+  if (!S.admin) try { S.queue = new Set(JSON.parse(LS.get(cacheKey() + '.queue') || '[]')); } catch {}
+  if (S.admin) try { S.users = JSON.parse(LS.get('admin.users') || '[]'); } catch {}
+  S.draft = null; try { S.draft = JSON.parse(LS.get(cacheKey() + '.draft') || 'null'); } catch {}
+  if (!S.draft) S.draft = newDoc();
+  S.curId = LS.get(cacheKey() + '.cur') || null;
+  if (S.curId && !curItem()) S.curId = null;
+}
+const newDoc = () => ({ name: '', lines: [], created: Date.now() });
+const live = kind => [...S.items.values()].filter(i => i.kind === kind && !i.deleted);
+const hist = () => live('hist').sort((a, b) => (b.data.t || 0) - (a.data.t || 0));
+const saved = () => live('data').sort((a, b) => b.updated - a.updated);
+
+function put(it, quiet) { // local write → queue → push
+  if (RO()) return;
+  const prev = S.items.get(key(it));
+  it.updated = Math.max(Date.now(), (prev?.updated || 0) + 1);
+  S.items.set(key(it), it); S.queue.add(key(it)); saveCache(); if (!quiet) render(); pushSoon();
+}
+
+// ---------- current data (draft until saved with a name; saved data autosaves) ----------
+const curItem = () => S.curId ? S.items.get(S.admin ? S.curId : S.user + '/' + S.curId) : null;
+function cur() { const it = curItem(); if (S.curId && (!it || it.deleted)) { S.curId = null; LS.del(cacheKey() + '.cur'); } return it && !it.deleted ? it.data : S.draft; }
+function mutate(fn, quiet) {
+  if (RO()) return;
+  const it = curItem();
+  if (it && !it.deleted) { const d = clone(it.data); fn(d); put({ ...it, data: d }, quiet); }
+  else { fn(S.draft); LS.set(cacheKey() + '.draft', JSON.stringify(S.draft)); if (!quiet) render(); }
+}
+function saveDraft() {
+  const d = S.draft;
+  if (!d.name.trim()) { toast('Isi nama data dulu, mis. "Rumah Pak Budi – Lt.1"'); $('#doc-name')?.focus(); return; }
+  const id = rid('d_');
+  put({ id, owner: S.user, kind: 'data', deleted: false, data: { ...clone(d), name: d.name.trim(), created: Date.now() } }, true);
+  S.curId = id; LS.set(cacheKey() + '.cur', id);
+  S.draft = newDoc(); LS.del(cacheKey() + '.draft');
+  render(); toast('Tersimpan ✓ — perubahan berikutnya tersimpan otomatis');
+}
+function openDoc(k) {
+  const it = S.items.get(k); if (!it) return;
+  S.curId = S.admin ? k : it.id; LS.set(cacheKey() + '.cur', S.curId); S.edit = null;
+  setView('geo');
+}
+function newData() {
+  S.curId = null; LS.del(cacheKey() + '.cur'); S.edit = null;
+  if (S.draft.lines.length || S.draft.name) { S.draft = newDoc(); LS.del(cacheKey() + '.draft'); }
+  setView('geo'); toast('Data baru dibuat'); setTimeout(() => $('#doc-name')?.focus(), 50);
+}
+function totals(d) {
+  const t = { vol: 0, area: 0, nv: 0, na: 0 };
+  for (const ln of d.lines || []) { const c = lineCat(ln); if (c === 'vol') { t.vol += ln.tot || 0; t.nv++; } else if (c === 'area') { t.area += ln.tot || 0; t.na++; } }
+  return t;
+}
+const lineCat = ln => ln.sh === 'expr' ? (ln.unit === 'm3' ? 'vol' : ln.unit === 'm2' ? 'area' : '') : SMAP.get(ln.sh)?.cat || '';
+const lineUnit = ln => ln.sh === 'expr' ? (ln.unit === 'm3' ? 'm³' : ln.unit === 'm2' ? 'm²' : '') : UNIT_TXT[SMAP.get(ln.sh)?.cat] || '';
+function lineDims(ln) {
+  if (ln.sh === 'expr') return ln.e;
+  const sh = SMAP.get(ln.sh); if (!sh) return '';
+  const parts = sh.f.filter(f => String(ln.v?.[f.k] ?? '').trim()).map(f => `${f.k} ${String(ln.v[f.k]).trim()}${f.t === 'len' ? ' ' + (ln.u?.[f.k] || 'm') : f.t === 'area' ? ' m²' : f.t === 'deg' ? '°' : ''}`);
+  const o = (sh.opts || []).map(op => ln.o?.[op.k] && ln.o[op.k] !== op.o[0][0] ? op.o.find(x => x[0] === ln.o[op.k])?.[1] : '').filter(Boolean);
+  return parts.join(' × ') + (o.length ? ' · ' + o.join(', ') : '');
+}
+
+// ---------- form compute ----------
+function form(id = S.shape) {
+  if (!S.forms[id]) {
+    let u = {}; try { u = JSON.parse(LS.get('units.' + id) || '{}'); } catch {}
+    const sh = SMAP.get(id), o = {}; for (const op of sh.opts || []) o[op.k] = op.o[0][0];
+    S.forms[id] = { v: {}, u, n: '1', lb: '', o };
+  }
+  return S.forms[id];
+}
+function compute(sh, fm) { // → {ok, val, tot, f, errs:{k:msg}, msg}
+  const v = {}, errs = {}; let missing = false;
+  for (const f of sh.f) {
+    const raw = fm.v[f.k];
+    if (raw == null || !String(raw).trim()) { if (!f.opt) missing = true; continue; }
+    try {
+      let x = numIn(raw);
+      if (x < 0) throw new Error('Tidak boleh negatif');
+      if (f.t === 'len') x *= UNITS[fm.u[f.k] || 'm'];
+      v[f.k] = x;
+    } catch (e) { errs[f.k] = e.message; }
+  }
+  let n = 1; try { n = String(fm.n ?? '').trim() ? numIn(fm.n) : 1; if (n < 0) throw new Error('Tidak boleh negatif'); } catch (e) { errs.n = e.message; }
+  if (Object.keys(errs).length) return { ok: false, errs, msg: 'Periksa isian yang ditandai merah.' };
+  if (missing) return { ok: false, errs, msg: '' };
+  try {
+    const [val, f] = sh.c(v, fm.o || {});
+    if (!Number.isFinite(val)) throw new Error('Hasil tidak valid');
+    if (val < 0) throw new Error('Hasil negatif — periksa ukuran (mis. bukaan lebih besar dari dinding)');
+    return { ok: true, val, n, tot: val * n, f, errs };
+  } catch (e) { return { ok: false, errs, msg: e.message }; }
+}
+function addLine() {
+  if (RO()) return;
+  const sh = SMAP.get(S.shape), fm = form(), r = compute(sh, fm);
+  if (!r.ok) { toast(r.msg || 'Lengkapi semua ukuran dulu.'); const f = sh.f.find(f => !f.opt && !String(fm.v[f.k] ?? '').trim()); if (f) $('#in-' + f.k)?.focus(); return; }
+  const ln = { id: S.edit || rid('l'), sh: sh.id, lb: fm.lb.trim(), v: { ...fm.v }, u: { ...fm.u }, o: { ...fm.o }, n: String(fm.n || '1'), r: r.val, tot: r.tot, f: r.f, t: Date.now() };
+  const editing = S.edit; S.edit = null; fm.lb = '';
+  mutate(d => { const i = d.lines.findIndex(x => x.id === ln.id); if (i >= 0) d.lines[i] = ln; else d.lines.push(ln); });
+  toast(editing ? 'Baris diperbarui ✓' : `Ditambahkan: ${R(r.tot)} ${UNIT_TXT[sh.cat]}`);
+}
+
+// ---------- calculator ----------
+function calcEval(s = S.expr) { return evaluate(s, { deg: S.deg, ans: S.ans }); }
+function pushHist(e, r) {
+  if (RO()) return;
+  put({ id: rid('h_'), owner: S.user, kind: 'hist', deleted: false, data: { e, r, t: Date.now(), deg: S.deg } }, true);
+  const h = hist(); for (const x of h.slice(HIST_MAX)) put({ ...x, data: {}, deleted: true }, true);
+}
+function disp() { return $('#disp'); }
+function caretPos() { const d = disp(), n = S.expr.length; const c = d && document.activeElement === d ? [d.selectionStart, d.selectionEnd] : S.caret || [n, n]; return [Math.min(c[0], n), Math.min(c[1], n)]; }
+function setExpr(s, pos = s.length) {
+  S.expr = s; S.caret = [pos, pos]; S.err = '';
+  const d = disp(); if (d) { d.value = s; try { d.setSelectionRange(pos, pos); } catch {} d.scrollLeft = d.scrollWidth; }
+  updPreview();
+}
+function ins(txt) {
+  const startNew = S.justEval && !/^[+\-−×÷^²³!%),E]|^ mod /.test(txt); // after "=": a number/function starts fresh, an operator continues
+  S.justEval = false;
+  if (startNew) { setExpr(txt); return; }
+  const [a, b] = caretPos(), s = S.expr;
+  setExpr(s.slice(0, a) + txt + s.slice(b), a + txt.length);
+}
+function back() {
+  S.justEval = false;
+  const [a, b] = caretPos(), s = S.expr;
+  if (a !== b) { setExpr(s.slice(0, a) + s.slice(b), a); return; }
+  if (!a) return;
+  const m = /(asinh|acosh|atanh|asin|acos|atan|sinh|cosh|tanh|sin|cos|tan|log2|log|ln|exp|abs|sqrt|cbrt|root|nPr|nCr|round|floor|ceil)\($|Ans$|rand$| mod $|√\($|∛\($/.exec(s.slice(0, a));
+  const n = m ? m[0].length : 1;
+  setExpr(s.slice(0, a - n) + s.slice(a), a - n);
+}
+function equals() {
+  const e = S.expr.trim(); if (!e) return;
+  try {
+    const v = calcEval(e), r = fmtCalc(v);
+    if (e !== r) pushHist(e, r);
+    S.ans = v; LS.set('ans', String(v)); S.justEval = true;
+    setExpr(r); S.lastEq = { e, r };
+    render();
+  } catch (err) { S.err = err.message; updPreview(); }
+}
+function updPreview() {
+  const p = $('#preview'); if (!p) return;
+  if (S.err) { p.textContent = '⚠ ' + S.err; p.className = 'preview err'; return; }
+  let t = '';
+  if (S.justEval && S.lastEq) t = S.lastEq.e + ' =';
+  else if (S.expr.trim() && !/^-?[\d.]+$/.test(S.expr.trim())) { try { t = '= ' + fmtCalc(calcEval()); } catch {} }
+  p.textContent = t; p.className = 'preview';
+  const m = $('#mem-ind'); if (m) m.hidden = !S.mem;
+}
+function memOp(op) {
+  if (op === 'mc') { S.mem = 0; }
+  else if (op === 'mr') { const v = fmtCalc(S.mem); ins(S.mem < 0 ? `(${v})` : v); }
+  else { let v; try { v = S.expr.trim() ? calcEval() : S.ans; } catch (e) { S.err = e.message; updPreview(); return; } S.mem += op === 'm+' ? v : -v; S.justEval = true; toast(`M = ${fmtCalc(S.mem)}`); }
+  LS.set('mem', String(S.mem)); updPreview();
+}
+// keypad: [label, insert or action, title, 2nd label, 2nd insert]
+const SCI = [
+  [['2nd', '@2nd', 'Fungsi kedua'], ['DEG', '@deg', 'Derajat / radian'], ['MC', '@mc', 'Hapus memori'], ['MR', '@mr', 'Panggil memori'], ['M+', '@m+', 'Tambah ke memori'], ['M−', '@m-', 'Kurangi memori']],
+  [['sin', 'sin(', '', 'sin⁻¹', 'asin('], ['cos', 'cos(', '', 'cos⁻¹', 'acos('], ['tan', 'tan(', '', 'tan⁻¹', 'atan('], ['ln', 'ln(', 'Logaritma natural', 'log₂', 'log2('], ['log', 'log(', 'Logaritma basis 10', 'eˣ', 'e^('], ['(', '(']],
+  [['x²', '²', 'Kuadrat', 'sinh', 'sinh('], ['x³', '³', 'Pangkat tiga', 'cosh', 'cosh('], ['xʸ', '^', 'Pangkat', 'tanh', 'tanh('], ['√', '√(', 'Akar kuadrat', 'ʸ√x', '^(1÷'], ['∛', '∛(', 'Akar pangkat tiga', '10ˣ', '10^('], [')', ')']],
+  [['1/x', '^(−1)', 'Kebalikan'], ['x!', '!', 'Faktorial', 'nCr', 'nCr('], ['|x|', 'abs(', 'Nilai mutlak', 'nPr', 'nPr('], ['π', 'π', 'Pi'], ['e', 'e', 'Bilangan Euler', 'Rand', 'rand'], [',', ',', 'Pemisah argumen (nCr, nPr)']],
+  [['EXP', 'E', '×10ⁿ'], ['mod', ' mod ', 'Sisa bagi'], ['Ans', 'Ans', 'Hasil terakhir'], ['rnd', 'round(', 'Pembulatan: round(x, desimal)', '⌊x⌋', 'floor('], ['%', '%', 'Persen'], ['±', '@neg', 'Ubah tanda']]
+];
+const BASIC = [
+  [['AC', '@ac', 'Hapus semua', '', '', 'fn'], ['⌫', '@del', 'Hapus 1', '', '', 'fn'], ['( )', '@par', 'Kurung'], ['÷', '÷', '', '', '', 'op']],
+  [['7', '7'], ['8', '8'], ['9', '9'], ['×', '×', '', '', '', 'op']],
+  [['4', '4'], ['5', '5'], ['6', '6'], ['−', '−', '', '', '', 'op']],
+  [['1', '1'], ['2', '2'], ['3', '3'], ['+', '+', '', '', '', 'op']],
+  [['0', '0'], ['00', '00'], ['.', '.'], ['=', '@eq', '', '', '', 'eq']]
+];
+function smartParen() { // "( )": opens unless a "(" is waiting to be closed after a value
+  const [a] = caretPos(), s = S.expr.slice(0, a), open = (s.match(/\(/g) || []).length - (s.match(/\)/g) || []).length;
+  ins(open > 0 && /[\d)πe!%²³]$|Ans$/.test(s) ? ')' : '(');
+}
+function negate() { // toggles the sign of the number before the caret
+  const [a] = caretPos(), s = S.expr; S.justEval = false;
+  const m = /(\d*\.?\d+(?:E[+\-−]?\d+)?|π|e|Ans)$/.exec(s.slice(0, a));
+  if (!m) { ins('−'); return; }
+  const st = a - m[0].length, before = s.slice(0, st), after = s.slice(a);
+  if (before.endsWith('(−') && after.startsWith(')')) setExpr(before.slice(0, -2) + m[0] + after.slice(1), st - 2 + m[0].length);
+  else if (before === '−' || before === '-') setExpr(m[0] + after, m[0].length);
+  else setExpr(before + '(−' + m[0] + ')' + after, a + 3);
+}
+function keyAct(v) {
+  if (v[0] !== '@') return ins(v);
+  switch (v) {
+    case '@ac': S.justEval = false; S.lastEq = null; setExpr(''); break;
+    case '@del': back(); break;
+    case '@eq': equals(); break;
+    case '@par': smartParen(); break;
+    case '@neg': negate(); break;
+    case '@2nd': S.second = !S.second; render(); break;
+    case '@deg': S.deg = !S.deg; LS.set('deg', S.deg ? 'deg' : 'rad'); render(); break;
+    case '@mc': case '@mr': case '@m+': case '@m-': memOp(v.slice(1)); break;
+  }
+}
+
+// ---------- server ----------
+async function rpc(fn, args) { // retries: some networks drop connections
+  for (let i = 0; ; i++) {
+    try {
+      const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method: 'POST', cache: 'no-store', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args) });
+      if (!r.ok) { const e = new Error('server ' + r.status); e.server = true; throw e; }
+      const t = await r.text(); return t ? JSON.parse(t) : null;
+    } catch (e) { if (i >= 4 || e.server) throw navigator.onLine ? e : new Error('offline'); await new Promise(r => setTimeout(r, 300 * (i + 1))); }
+  }
+}
+let pushTimer = null;
+function pushSoon() { clearTimeout(pushTimer); pushTimer = setTimeout(syncNow, 400); showSync(); }
+async function syncNow() {
+  if (!S.user && !S.admin) return;
+  if (S.sync.busy) { S.sync.again = true; return; }
+  S.sync.busy = true; showSync(); let changed = false; const me = cacheKey();
+  try {
+    if (!S.admin && S.queue.size) {
+      const keys = [...S.queue], sent = keys.map(k => S.items.get(k)).filter(Boolean);
+      const snap = new Map(sent.map(i => [key(i), i.updated]));
+      for (let i = 0; i < sent.length; i += 200) {
+        const b = sent.slice(i, i + 200).map(({ id, kind, data, updated, deleted }) => ({ id, kind, data, updated, deleted }));
+        const r = await rpc('cl_put', { p_owner: S.user, p_pin: S.pin || null, p_items: b });
+        if (!r?.ok) { needPin(r?.pin); return; }
+      }
+      for (const k of keys) if (S.items.get(k)?.updated === snap.get(k)) S.queue.delete(k);
+      saveCache(); ping();
+    }
+    let rows;
+    if (S.admin) {
+      const r = await rpc('cl_admin', { p_pass: S.pass, p_after: S.seq });
+      if (!r?.ok) { logout(); return; }
+      S.users = r.users || []; LS.set('admin.users', JSON.stringify(S.users)); rows = r.rows || [];
+    } else { const r = await rpc('cl_list', { p_owner: S.user, p_after: S.seq, p_pin: S.pin || null }); if (!r?.ok) { needPin(r?.pin); return; } rows = r.rows || []; }
+    if (me !== cacheKey()) return;
+    for (const r of rows) {
+      const it = { id: r.id, owner: r.owner || S.user, kind: r.kind, data: r.data || {}, updated: Number(r.updated), deleted: !!r.deleted };
+      const cur = S.items.get(key(it));
+      if (!cur || (it.updated >= cur.updated && !S.queue.has(key(it)))) {
+        if (!cur || JSON.stringify(cur) !== JSON.stringify(it)) changed = true;
+        if (it.deleted && it.kind === 'hist') S.items.delete(key(it)); else S.items.set(key(it), it);
+      }
+      S.seq = Math.max(S.seq, Number(r.seq));
+    }
+    if (changed || rows.length) saveCache();
+    S.sync.at = new Date(); S.sync.err = '';
+  } catch (e) { S.sync.err = e?.message === 'offline' ? 'offline — tersimpan di perangkat ini' : (e?.message || String(e)); }
+  finally { S.sync.busy = false; }
+  if (S.sync.again) { S.sync.again = false; return syncNow(); }
+  if (changed) render(); else showSync();
+}
+// realtime: supabase broadcast pings (no data inside), plus a 10 s check
+let sb = null, chans = [];
+async function liveStart() {
+  try {
+    if (!window.supabase) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    sb ||= window.supabase.createClient(SB_URL, SB_KEY);
+    liveStop();
+    const all = sb.channel('calc-all');
+    if (S.admin) all.on('broadcast', { event: 'chg' }, () => syncNow());
+    chans.push(all.subscribe());
+    if (!S.admin) chans.push(sb.channel('calc-u-' + S.user).on('broadcast', { event: 'chg' }, () => syncNow()).subscribe());
+  } catch {}
+}
+function liveStop() { if (sb) chans.forEach(c => sb.removeChannel(c)); chans = []; }
+function ping() { for (const c of chans) try { c.send({ type: 'broadcast', event: 'chg', payload: { t: Date.now() } }); } catch {} }
+const syncText = () => S.sync.err ? '⚠ ' + S.sync.err : S.sync.busy || S.queue.size ? '⏳ Menyimpan…' : S.sync.at ? '☁ Tersinkron ' + hms(S.sync.at) : '☁ Menghubungkan…';
+function showSync() { document.querySelectorAll('.sync').forEach(e => { e.textContent = syncText(); }); }
+
+// ---------- login (same accounts & PIN as Planner / Notes) ----------
+const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)))].map(x => x.toString(16).padStart(2, '0')).join('');
+const pinHash = (name, pin) => sha('planner-pin:' + name + ':' + pin);
+const PIN_MSG = { need: 'Masukkan PIN.', wrong: 'PIN salah.', locked: 'Terlalu banyak PIN salah. Coba lagi 15 menit lagi.', format: 'PIN harus 4–12 angka.', invalid: 'Nama pengguna tidak valid.' };
+function needPin(code) { // server says this session's PIN is missing/wrong: back to the PIN screen
+  const name = S.user; if (!name) return;
+  liveStop(); LS.set('u.' + name + '.haspin', '1'); SS.del('pin.' + name);
+  S.user = null; S.pin = ''; S.items = new Map(); S.queue = new Set(); S.seq = 0;
+  S.gate = { name, msg: code === 'locked' ? PIN_MSG.locked : 'Akun ini memakai PIN. Masukkan PIN untuk melanjutkan.' };
+  if (dlg().open) dlg().close(); render();
+}
+async function login(raw, pass, remember, pin) {
+  const name = normUser(raw);
+  if (!validUser(name)) throw new Error('Nama pengguna 3–32 karakter: huruf, angka, titik, garis bawah, atau tanda minus.');
+  if (name === ADMIN) {
+    if (!pass) throw new Error('Masukkan password Admin.');
+    const r = await rpc('cl_admin', { p_pass: pass, p_after: 0 }).catch(e => { throw new Error('Tidak bisa menghubungi server (' + e.message + ').'); });
+    if (!r?.ok) throw new Error(r?.locked ? 'Terlalu banyak percobaan salah. Coba lagi 15 menit lagi.' : 'Password Admin salah.');
+    S.admin = true; S.user = null; S.pass = pass;
+    loadCache(); S.items = new Map(); S.seq = 0; S.users = r.users || [];
+    for (const x of r.rows || []) { const it = { id: x.id, owner: x.owner, kind: x.kind, data: x.data || {}, updated: Number(x.updated), deleted: !!x.deleted }; S.items.set(key(it), it); S.seq = Math.max(S.seq, Number(x.seq)); }
+    saveCache(); LS.set('admin.users', JSON.stringify(S.users)); S.sync.at = new Date();
+    SS.set('admin', pass); if (remember) LS.set('session', JSON.stringify({ admin: true })); else LS.del('session');
+    S.view = 'data';
+  } else {
+    let r = null;
+    try { r = await rpc('pl_login', { p_owner: name, p_pin: pin || null }); } catch (e) { // offline: unlock with the PIN checked on this device before
+      const h = LS.get('u.' + name + '.pinhash');
+      if (h) { if (!pin) { const er = new Error(PIN_MSG.need); er.needPin = true; throw er; } if (await pinHash(name, pin) !== h) throw new Error(PIN_MSG.wrong); }
+      else if (LS.get('u.' + name + '.haspin')) throw new Error('Tidak bisa menghubungi server (' + e.message + ').');
+    }
+    if (r && !r.ok) { const er = new Error(PIN_MSG[r.pin] || 'Gagal masuk.'); er.needPin = r.pin === 'need'; throw er; }
+    S.admin = false; S.user = name; S.pass = ''; S.pin = pin || ''; S.gate = null;
+    if (r) { S.hasPin = !!r.pin; if (r.pin) { LS.set('u.' + name + '.haspin', '1'); LS.set('u.' + name + '.pinhash', await pinHash(name, pin)); } else { LS.del('u.' + name + '.haspin'); LS.del('u.' + name + '.pinhash'); } }
+    else S.hasPin = !!pin;
+    if (pin) SS.set('pin.' + name, pin);
+    loadCache();
+    if (remember) LS.set('session', JSON.stringify({ user: name })); else { LS.del('session'); SS.set('user', name); }
+    setTimeout(syncNow, 0);
+  }
+  liveStart();
+}
+function logout() {
+  liveStop(); LS.del('session'); SS.del('admin'); SS.del('user'); if (S.user) SS.del('pin.' + S.user); S.pin = ''; S.gate = null;
+  S.user = null; S.admin = false; S.pass = ''; S.items = new Map(); S.queue = new Set(); S.seq = 0; S.curId = null; S.sync = { busy: false, again: false, at: null, err: '' };
+  if (dlg().open) dlg().close(); render();
+}
+
+// ---------- views ----------
+function setView(v) { S.view = v; LS.set('view', v); render(); window.scrollTo(0, 0); }
+const TABS = [['calc', '🧮', 'Kalkulator'], ['geo', '📐', 'Luas & Volume'], ['data', '🗂', 'Data']];
+function render() {
+  const app = $('#app');
+  if (!S.user && !S.admin) { app.innerHTML = gateView(); syncMask(); setTimeout(() => ($('#pin-in') || $('#user-in'))?.focus(), 30); return; }
+  // keep focus + caret across re-renders (realtime updates arrive while typing)
+  const ae = document.activeElement, fid = ae?.id, sel = fid && ae.setSelectionRange && ae.type !== 'number' ? [ae.selectionStart, ae.selectionEnd] : null;
+  const body = S.view === 'geo' ? geoView() : S.view === 'data' ? dataView() : calcView();
+  app.innerHTML = `<header class="top"><div class="top-in">
+      <a class="brand" href="#" data-a="view" data-v="calc"><span class="logo">±</span><span>Calc</span></a>
+      <nav class="tabs">${TABS.map(([v, i, l]) => `<button type="button" class="tab${S.view === v ? ' on' : ''}" data-a="view" data-v="${v}">${i} ${l}</button>`).join('')}</nav>
+      <div class="top-r"><span class="sync">${syncText()}</span><button type="button" class="chip" data-a="menu">${S.admin ? '🛡 Admin' : '👤 ' + esc(S.user)}</button></div>
+    </div></header>
+    <main class="main v-${S.view}">${body}</main>
+    <nav class="bnav">${TABS.map(([v, i, l]) => `<button type="button" class="${S.view === v ? 'on' : ''}" data-a="view" data-v="${v}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
+  if (S.view === 'calc') { const d = disp(); if (d) { d.value = S.expr; d.scrollLeft = d.scrollWidth; } updPreview(); }
+  if (fid) { const el = document.getElementById(fid); if (el && el !== document.activeElement) { el.focus({ preventScroll: true }); if (sel) try { el.setSelectionRange(...sel); } catch {} } }
+}
+
+// calculator view
+function calcView() {
+  const coarse = matchMedia('(pointer:coarse)').matches;
+  const key = (k, cls = '') => {
+    const alt = S.second && k[3], lab = alt ? k[3] : k[0], v = alt ? k[4] : k[1];
+    const lab2 = k[1] === '@deg' ? (S.deg ? 'DEG' : 'RAD') : lab;
+    return `<button type="button" class="key ${cls} ${k[5] || ''}${alt ? ' alt' : ''}${k[1] === '@2nd' && S.second ? ' on' : ''}" data-a="key" data-v="${esc(v)}" title="${esc(k[2] || '')}">${esc(lab2)}</button>`;
+  };
+  const h = hist(), q = S.calcQ.trim().toLowerCase(), hf = q ? h.filter(x => (x.data.e + ' ' + x.data.r).toLowerCase().includes(q)) : h;
+  return `<section class="calc card">
+      <div class="screen">
+        <div class="scr-top"><span class="ind">${S.deg ? 'DEG' : 'RAD'}</span><span class="ind" id="mem-ind"${S.mem ? '' : ' hidden'}>M</span>${S.second ? '<span class="ind">2nd</span>' : ''}<span class="sp"></span><span class="preview" id="preview"></span></div>
+        <input id="disp" class="disp" autocomplete="off" autocapitalize="off" spellcheck="false" ${coarse ? 'inputmode="none"' : ''} placeholder="0" aria-label="Ekspresi">
+      </div>
+      <div class="pads">
+        <div class="sci">${SCI.map(r => r.map(k => key(k, 'sk')).join('')).join('')}</div>
+        <div class="basic">${BASIC.map(r => r.map(k => key(k, /^\d+$|^\.$/.test(k[0]) ? 'dig' : '')).join('')).join('')}</div>
+      </div>
+    </section>
+    <section class="hist card">
+      <div class="h-head"><h2>🕘 Riwayat hitung <span class="muted">${h.length}</span></h2>${h.length && !RO() ? '<button type="button" class="btn sm danger" data-a="histclear" id="hc-btn">Hapus semua</button>' : ''}</div>
+      ${h.length > 6 ? `<input class="h-q" id="calc-q" type="search" placeholder="Cari riwayat…" value="${esc(S.calcQ)}">` : ''}
+      <div class="h-list">${hf.map(x => `<div class="h-row" data-a="hload" data-v="${esc(x.id)}" title="Klik untuk memakai lagi">
+          <div class="h-e">${esc(x.data.e)}</div><div class="h-r">= ${esc(x.data.r)}</div>
+          <div class="h-meta"><span class="muted small">${fullDT(x.data.t)}</span><span class="sp"></span>${RO() ? '' : `<button type="button" class="btn xs" data-a="hdata" data-v="${esc(x.id)}" title="Tambahkan hasil ini ke data perhitungan">＋ Data</button><button type="button" class="btn xs" data-a="hdel" data-v="${esc(x.id)}" title="Hapus">✕</button>`}</div>
+        </div>`).join('') || `<p class="muted small empty">Belum ada riwayat. Setiap kali menekan <b>=</b>, perhitungan tersimpan di sini dan ikut tersinkron ke HP/laptop lain.</p>`}</div>
+    </section>`;
+}
+
+// luas & volume view
+function geoView() {
+  const sh = SMAP.get(S.shape), fm = form(), r = compute(sh, fm), ro = RO();
+  const cats = [['vol', '🧊 Volume (m³)'], ['area', '▭ Luas (m²)']];
+  const groups = [...new Set(SHAPES.filter(s => s.cat === S.cat).map(s => s.g))];
+  const fld = f => {
+    const err = r.errs?.[f.k];
+    const unit = f.t === 'len' ? `<select class="u" data-u="${f.k}" aria-label="Satuan ${esc(f.k)}">${Object.keys(UNITS).map(u => `<option${(fm.u[f.k] || 'm') === u ? ' selected' : ''}>${u}</option>`).join('')}</select>` : `<span class="u fixed">${f.t === 'area' ? 'm²' : f.t === 'deg' ? '°' : 'bh'}</span>`;
+    return `<label class="fi${err ? ' bad' : ''}"><span>${esc(f.l)}${f.opt ? ' <i class="muted">(opsional)</i>' : ''}</span>
+      <span class="fi-in"><input id="in-${f.k}" data-f="${f.k}" inputmode="decimal" autocomplete="off" value="${esc(fm.v[f.k] ?? '')}" placeholder="0"${ro ? ' disabled' : ''}>${unit}</span>${err ? `<small class="ferr">${esc(err)}</small>` : ''}</label>`;
+  };
+  const d = cur(), t = totals(d), saved = !!S.curId;
+  return `<section class="geo-l">
+      <div class="seg2">${cats.map(([v, l]) => `<button type="button" class="${S.cat === v ? 'on' : ''}" data-a="cat" data-v="${v}">${l}</button>`).join('')}</div>
+      <div class="shape-pick"><select id="shape-sel" aria-label="Pilih jenis pekerjaan / bentuk">${groups.map(g => `<optgroup label="${esc(g)}">${SHAPES.filter(s => s.cat === S.cat && s.g === g).map(s => `<option value="${s.id}"${s.id === sh.id ? ' selected' : ''}>${s.ic} ${esc(s.n)}</option>`).join('')}</optgroup>`).join('')}</select>
+        <button type="button" class="btn${chipsOpen() ? ' on' : ''}" data-a="chips" title="Tampilkan semua bentuk">${chipsOpen() ? '▴ Tutup' : '▦ Semua'}</button></div>
+      <div class="cgs"${chipsOpen() ? '' : ' hidden'}>${groups.map(g => `<div class="cg"><span class="cg-t">${esc(g)}</span><div class="chips">${SHAPES.filter(s => s.cat === S.cat && s.g === g).map(s => `<button type="button" class="shp${s.id === sh.id ? ' on' : ''}" data-a="shape" data-v="${s.id}" title="${esc(s.n)}"><span>${s.ic}</span>${esc(s.n)}</button>`).join('')}</div></div>`).join('')}</div>
+      <form class="card fcard" id="geo-form" autocomplete="off">
+        <div class="f-head"><div><h2>${sh.ic} ${esc(sh.n)}</h2><div class="rumus">${esc(sh.rumus)}</div></div>${svgFor(sh)}</div>
+        ${(sh.opts || []).map(op => `<div class="fopt"><span class="muted small">${esc(op.l)}</span><div class="seg2 sm">${op.o.map(([v, l]) => `<button type="button" class="${fm.o[op.k] === v ? 'on' : ''}" data-a="fopt" data-k="${op.k}" data-v="${v}">${esc(l)}</button>`).join('')}</div></div>`).join('')}
+        <div class="fgrid">${sh.f.map(fld).join('')}
+          <label class="fi${r.errs?.n ? ' bad' : ''}"><span>Jumlah (×)</span><span class="fi-in"><input id="in-n" data-f="n" inputmode="decimal" value="${esc(fm.n)}" placeholder="1"${ro ? ' disabled' : ''}><span class="u fixed">bh</span></span>${r.errs?.n ? `<small class="ferr">${esc(r.errs.n)}</small>` : ''}</label>
+          <label class="fi wide"><span>Nama item <i class="muted">(opsional, mis. K1, B2, Saluran Jl. Mawar)</i></span><input id="in-lb" data-f="lb" value="${esc(fm.lb)}" maxlength="80"${ro ? ' disabled' : ''}></label>
+        </div>
+        <p class="muted small tip">💡 Isian boleh berupa hitungan, mis. <b>2*1,5</b> atau <b>3+0,25</b>. Desimal pakai koma atau titik. Satuan tiap ukuran bisa m / cm / mm.</p>
+        <div class="res" id="geo-res">${resBox(sh, r)}</div>
+        ${ro ? '' : `<div class="f-act">${S.edit ? '<button type="button" class="btn" data-a="editcancel">Batal</button>' : '<button type="button" class="btn" data-a="fclear">Kosongkan</button>'}<button type="submit" class="btn primary">${S.edit ? '✓ Perbarui baris' : '＋ Tambah ke data'}</button></div>`}
+      </form>
+    </section>
+    <section class="geo-r card">
+      <div class="doc-h">
+        <label class="doc-name"><span class="muted small">${saved ? '✓ Data tersimpan · otomatis sinkron' : '📝 Data baru (belum disimpan)'}</span>
+          <input id="doc-name" value="${esc(d.name)}" placeholder="Nama data, mis. Rumah Pak Budi – Lt.1" maxlength="120"${ro ? ' disabled' : ''}></label>
+        <div class="doc-act">${ro ? '' : `${saved ? '' : '<button type="button" class="btn primary" data-a="savedoc">💾 Simpan</button>'}<button type="button" class="btn" data-a="newdoc" title="Mulai data perhitungan baru">＋ Baru</button>`}<button type="button" class="btn" data-a="docmenu" title="Salin / ekspor">⋯</button></div>
+      </div>
+      ${S.admin && curItem() ? `<p class="muted small">👤 ${esc(curItem().owner)} · hanya baca</p>` : ''}
+      <div class="tot"><div><span>Total volume</span><b>${R(t.vol)} m³</b><small>${t.nv} item</small></div><div><span>Total luas</span><b>${R(t.area)} m²</b><small>${t.na} item</small></div></div>
+      <div class="lines">${(d.lines || []).map((ln, i) => lineRow(ln, i, ro)).join('') || `<p class="muted small empty">Belum ada item. Pilih bentuk di kiri, isi ukuran, lalu tekan <b>＋ Tambah ke data</b>. Hasil dari kalkulator juga bisa dimasukkan lewat <b>＋ Data</b> di riwayat hitung.</p>`}</div>
+      ${recap(d)}
+    </section>`;
+}
+function resBox(sh, r) {
+  const u = UNIT_TXT[sh.cat];
+  if (!r.ok) return `<div class="res-in empty"><span class="muted">${r.msg ? '⚠ ' + esc(r.msg) : 'Isi ukuran untuk melihat hasil.'}</span></div>`;
+  return `<div class="res-in"><div class="res-f">${esc(r.f)} = <b>${R(r.val)} ${u}</b></div>
+    ${r.n !== 1 ? `<div class="res-f">${R(r.val)} × ${N(r.n)} bh</div>` : ''}<div class="res-big">${R(r.tot)} <small>${u}</small></div></div>`;
+}
+function lineRow(ln, i, ro) {
+  const sh = SMAP.get(ln.sh), name = ln.sh === 'expr' ? 'Kalkulator' : sh?.n || ln.sh, u = lineUnit(ln);
+  return `<div class="ln${S.edit === ln.id ? ' editing' : ''}">
+    <span class="ln-i">${i + 1}</span>
+    <div class="ln-m" data-a="${ro ? '' : 'editline'}" data-v="${esc(ln.id)}">
+      <div class="ln-t">${ln.lb ? `<b>${esc(ln.lb)}</b> · ` : ''}${ln.sh === 'expr' ? '🧮' : sh?.ic || ''} ${esc(name)}</div>
+      <div class="ln-d muted small">${esc(lineDims(ln))}${Number(ln.n) !== 1 && ln.n ? ` · × ${esc(ln.n)} bh` : ''}</div>
+    </div>
+    <div class="ln-r"><b>${ln.sh === 'expr' ? esc(N(ln.tot, 6)) : R(ln.tot)}</b> ${ln.sh === 'expr' && !ro ? `<select class="u" data-lu="${esc(ln.id)}" aria-label="Satuan"><option value=""${!ln.unit ? ' selected' : ''}>—</option><option value="m3"${ln.unit === 'm3' ? ' selected' : ''}>m³</option><option value="m2"${ln.unit === 'm2' ? ' selected' : ''}>m²</option></select>` : `<small>${u}</small>`}</div>
+    ${ro ? '' : `<div class="ln-a"><button type="button" class="btn xs" data-a="editline" data-v="${esc(ln.id)}" title="Ubah">✎</button><button type="button" class="btn xs" data-a="dupline" data-v="${esc(ln.id)}" title="Duplikat">⧉</button><button type="button" class="btn xs" data-a="delline" data-v="${esc(ln.id)}" title="Hapus">✕</button></div>`}
+  </div>`;
+}
+function recap(d) {
+  const g = new Map();
+  for (const ln of d.lines || []) { const c = lineCat(ln); if (!c) continue; const k = ln.sh === 'expr' ? 'expr-' + c : ln.sh; const x = g.get(k) || { n: ln.sh === 'expr' ? 'Kalkulator' : SMAP.get(ln.sh)?.n, c, v: 0, cnt: 0 }; x.v += ln.tot || 0; x.cnt++; g.set(k, x); }
+  if (g.size < 2) return '';
+  return `<details class="recap"><summary>Rekap per jenis (${g.size})</summary><table>${[...g.values()].sort((a, b) => a.c.localeCompare(b.c) || b.v - a.v).map(x => `<tr><td>${esc(x.n)} <span class="muted small">${x.cnt} item</span></td><td class="num">${R(x.v)} ${UNIT_TXT[x.c]}</td></tr>`).join('')}</table></details>`;
+}
+
+// saved data view
+function dataView() {
+  const q = S.q.trim().toLowerCase(), all = saved(), list = q ? all.filter(it => (it.data.name + ' ' + it.owner + ' ' + (it.data.lines || []).map(l => l.lb).join(' ')).toLowerCase().includes(q)) : all;
+  const dr = S.draft, curK = curItem() ? key(curItem()) : '';
+  return `<div class="head"><h1>🗂 Data tersimpan <span class="muted">${all.length}</span></h1>
+      <div class="head-r"><input id="data-q" type="search" placeholder="Cari nama data atau item…" value="${esc(S.q)}">${RO() ? '' : '<button type="button" class="btn primary" data-a="newdoc">＋ Data baru</button>'}</div></div>
+    ${!RO() && dr.lines.length ? `<div class="card draft" data-a="opendraft"><b>📝 ${esc(dr.name || 'Draft belum disimpan')}</b><span class="muted small">${dr.lines.length} item · belum disimpan — klik untuk melanjutkan</span></div>` : ''}
+    <div class="dgrid">${list.map(it => { const d = it.data, t = totals(d); return `<div class="card dcard${key(it) === curK ? ' on' : ''}">
+        <div class="dc-m" data-a="opendoc" data-v="${esc(key(it))}">
+          <div class="dc-n">${esc(d.name || '(tanpa nama)')}</div>
+          <div class="muted small">${S.admin ? '👤 ' + esc(it.owner) + ' · ' : ''}diubah ${fullDT(it.updated)} · ${(d.lines || []).length} item</div>
+          <div class="dc-t"><span>🧊 <b>${R(t.vol)}</b> m³</span><span>▭ <b>${R(t.area)}</b> m²</span></div>
+        </div>
+        ${RO() ? '' : `<div class="dc-a"><button type="button" class="btn sm" data-a="opendoc" data-v="${esc(key(it))}">Buka</button><button type="button" class="btn sm" data-a="rename" data-v="${esc(key(it))}">Ganti nama</button><button type="button" class="btn sm" data-a="dupdoc" data-v="${esc(key(it))}">Duplikat</button><button type="button" class="btn sm danger" data-a="deldoc" data-v="${esc(key(it))}">Hapus</button></div>`}
+      </div>`; }).join('') || `<p class="muted empty">${q ? 'Tidak ada yang cocok.' : 'Belum ada data tersimpan. Buka <b>📐 Luas & Volume</b>, tambahkan item, beri nama, lalu tekan <b>💾 Simpan</b>.'}</p>`}</div>`;
+}
+
+// ---------- export ----------
+function docText(d) {
+  const t = totals(d), rows = (d.lines || []).map((ln, i) => `${i + 1}. ${ln.lb ? ln.lb + ' — ' : ''}${ln.sh === 'expr' ? 'Kalkulator' : SMAP.get(ln.sh)?.n}: ${lineDims(ln)}${Number(ln.n) !== 1 ? ' × ' + ln.n + ' bh' : ''} = ${ln.sh === 'expr' ? N(ln.tot, 6) : R(ln.tot)} ${lineUnit(ln)}`);
+  return `${d.name || 'Data perhitungan'}\n${rows.join('\n')}\n\nTotal volume: ${R(t.vol)} m³\nTotal luas: ${R(t.area)} m²`;
+}
+function docCsv(d) {
+  const sep = loc() === 'id-ID' ? ';' : ',', q = s => `"${String(s ?? '').replace(/"/g, '""')}"`;
+  const num = x => Number.isFinite(x) ? x.toLocaleString(loc(), { useGrouping: false, maximumFractionDigits: 6 }) : '';
+  const rows = [['No', 'Nama item', 'Jenis', 'Ukuran', 'Rumus', 'Hasil per bh', 'Jumlah', 'Total', 'Satuan']];
+  (d.lines || []).forEach((ln, i) => rows.push([i + 1, ln.lb, ln.sh === 'expr' ? 'Kalkulator' : SMAP.get(ln.sh)?.n, lineDims(ln), ln.f || ln.e, num(ln.r), ln.n, num(ln.tot), lineUnit(ln)]));
+  const t = totals(d); rows.push([], ['', '', '', '', '', '', 'Total volume', num(t.vol), 'm³'], ['', '', '', '', '', '', 'Total luas', num(t.area), 'm²']);
+  return '﻿' + rows.map(r => r.map(q).join(sep)).join('\r\n');
+}
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+async function copyText(t) { try { await navigator.clipboard.writeText(t); toast('Disalin ✓'); } catch { toast('Tidak bisa menyalin di browser ini.'); } }
+
+// ---------- gate ----------
+function gateView() {
+  if (S.gate) { const n = S.gate.name; return `<div class="gate"><form class="gate-card" id="gate-form" autocomplete="off">
+    <div class="logo">🔒</div><h1>Calc</h1><p class="gate-sub">👤 ${esc(n.slice(0, 4) + '*'.repeat(Math.max(0, n.length - 4)))}</p>
+    <label class="gate-field"><span>🔑</span><input id="pin-in" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" placeholder="PIN" autocomplete="off"></label>
+    <label class="check"><input type="checkbox" id="remember" checked> Tetap masuk di perangkat ini</label>
+    <button class="gate-btn" type="submit">Masuk</button>
+    <div class="gate-err" id="gate-err" role="alert">${esc(S.gate.msg || '')}</div>
+    <p class="gate-note"><a href="#" data-a="gateback" style="color:#fff">← Ganti nama pengguna</a></p>
+  </form></div>`; }
+  const adm = normUser($('#user-in')?.value) === ADMIN;
+  return `<div class="gate"><form class="gate-card" id="gate-form" autocomplete="off">
+    <div class="logo">±</div><h1>Calc</h1><p class="gate-sub">Kalkulator scientific + luas & volume konstruksi</p>
+    <label class="gate-field"><span>👤</span><span class="mask-wrap"><input id="user-in" name="user" type="text" placeholder="Nama pengguna" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="32" required value="${esc($('#user-in')?.value || '')}"><span id="user-mask" aria-hidden="true"></span></span></label>
+    <label class="gate-field" id="pass-row" style="${adm ? '' : 'display:none'}"><span>🔑</span><input id="pass-in" type="password" inputmode="numeric" placeholder="Password Admin" autocomplete="off"></label>
+    <label class="check"><input type="checkbox" id="remember" checked> Tetap masuk di perangkat ini</label>
+    <button class="gate-btn" type="submit">Masuk</button>
+    <div class="gate-err" id="gate-err" role="alert"></div>
+    <p class="gate-note">Data tersimpan per nama pengguna dan tersinkron real time di HP & laptop. Nama & PIN sama dengan <a href="https://liemyo.github.io/planner/" style="color:#fff">Planner</a> dan <a href="https://liemyo.github.io/notes/" style="color:#fff">Notes</a>. Nama yang belum pernah dipakai akan membuat akun baru.</p>
+  </form></div>`;
+}
+function syncMask() {
+  const i = $('#user-in'), m = $('#user-mask'); if (!i || !m) return;
+  const v = i.value; m.textContent = v.slice(0, 4) + '*'.repeat(Math.max(0, v.length - 4)); m.scrollLeft = i.scrollLeft;
+  const pr = $('#pass-row'); if (pr) pr.style.display = normUser(v) === ADMIN ? '' : 'none';
+}
+
+// ---------- dialogs ----------
+const dlg = () => $('#dlg');
+function openMenu() {
+  const theme = LS.get('theme') || 'auto', dec = LS.get('dec') === 'en' ? 'en' : 'id';
+  dlg().innerHTML = `<div class="dlg"><h2>${S.admin ? '🛡 Admin' : '👤 ' + esc(S.user)}</h2>
+    <p class="muted small" style="margin:0">${syncText()} · versi ${BUILD}</p>
+    <div class="fld"><span>Tampilan</span><div class="seg">${[['auto', 'Otomatis'], ['light', 'Terang'], ['dark', 'Gelap']].map(([v, l]) => `<label><input type="radio" name="theme" value="${v}"${theme === v ? ' checked' : ''}><span>${l}</span></label>`).join('')}</div></div>
+    <div class="fld"><span>Format angka hasil</span><div class="seg two-s">${[['id', '1.234,567'], ['en', '1,234.567']].map(([v, l]) => `<label><input type="radio" name="dec" value="${v}"${dec === v ? ' checked' : ''}><span>${l}</span></label>`).join('')}</div></div>
+    ${S.admin ? '<p class="muted small" style="margin:0">Mode Admin hanya melihat data semua pengguna (hanya baca), diperbarui real time.</p>' : `
+    <div class="fld"><span>🔒 PIN masuk</span><p class="small" style="margin:0">${S.hasPin ? '✓ PIN aktif — diminta setiap kali masuk.' : 'Belum ada PIN. Pasang PIN agar data tidak bisa dibuka hanya dengan nama pengguna.'} PIN ini sama dengan PIN Planner & Notes.</p>
+      ${S.hasPin ? '<input type="password" id="pin-old" inputmode="numeric" maxlength="12" placeholder="PIN saat ini" autocomplete="off">' : ''}
+      <div class="two"><input type="password" id="pin-new" inputmode="numeric" maxlength="12" placeholder="PIN baru (4–12 angka)" autocomplete="new-password"><input type="password" id="pin-new2" inputmode="numeric" maxlength="12" placeholder="Ulangi PIN baru" autocomplete="new-password"></div>
+      <div class="dlg-f" style="justify-content:flex-start"><button type="button" class="btn primary" data-a="pinsave">${S.hasPin ? 'Ubah PIN' : 'Pasang PIN'}</button>${S.hasPin ? '<button type="button" class="btn danger" data-a="pinoff">Hapus PIN</button>' : ''}<span class="small" id="pin-msg" style="align-self:center;color:var(--red)"></span></div></div>`}
+    <div class="dlg-f"><button type="button" class="btn danger" data-a="logout">Keluar</button><span class="sp"></span><button type="button" class="btn primary" data-a="close">Tutup</button></div></div>`;
+  if (!dlg().open) dlg().showModal();
+}
+function openDocMenu() {
+  const d = cur(), it = curItem();
+  dlg().innerHTML = `<div class="dlg"><h2>${esc(d.name || 'Data perhitungan')}</h2>
+    <p class="muted small" style="margin:0">${(d.lines || []).length} item${it ? ' · diubah ' + fullDT(it.updated) : ' · belum disimpan'}</p>
+    <div class="dlg-grid">
+      <button type="button" class="btn" data-a="copydoc">📋 Salin sebagai teks</button>
+      <button type="button" class="btn" data-a="csvdoc">⬇ Unduh CSV (Excel)</button>
+      ${RO() ? '' : `${it ? `<button type="button" class="btn" data-a="dupdoc" data-v="${esc(key(it))}">⧉ Duplikat data</button><button type="button" class="btn danger" data-a="deldoc" data-v="${esc(key(it))}">🗑 Hapus data</button>` : ''}<button type="button" class="btn danger" data-a="clearlines">Kosongkan semua item</button>`}
+    </div>
+    <div class="dlg-f"><span class="sp"></span><button type="button" class="btn primary" data-a="close">Tutup</button></div></div>`;
+  if (!dlg().open) dlg().showModal();
+}
+function openRename(k) {
+  const it = S.items.get(k); if (!it) return;
+  dlg().innerHTML = `<form class="dlg" id="rename-form" data-k="${esc(k)}"><h2>Ganti nama data</h2>
+    <input id="rename-in" value="${esc(it.data.name)}" maxlength="120" required>
+    <div class="dlg-f"><span class="sp"></span><button type="button" class="btn" data-a="close">Batal</button><button type="submit" class="btn primary">Simpan</button></div></form>`;
+  if (!dlg().open) dlg().showModal(); setTimeout(() => $('#rename-in')?.select(), 30);
+}
+async function pinChange(old, nw, out) {
+  out.textContent = 'Menyimpan…';
+  try {
+    const r = await rpc('pl_pin_set', { p_owner: S.user, p_old: old || S.pin || null, p_new: nw || null });
+    if (!r?.ok) { out.textContent = r?.pin === 'wrong' || r?.pin === 'need' ? 'PIN saat ini salah.' : PIN_MSG[r?.pin] || 'Gagal.'; return; }
+    S.pin = nw; S.hasPin = !!nw;
+    if (nw) { SS.set('pin.' + S.user, nw); LS.set('u.' + S.user + '.haspin', '1'); LS.set('u.' + S.user + '.pinhash', await pinHash(S.user, nw)); }
+    else { SS.del('pin.' + S.user); LS.del('u.' + S.user + '.haspin'); LS.del('u.' + S.user + '.pinhash'); }
+    openMenu(); toast(nw ? 'PIN tersimpan ✓ — berlaku juga di Planner & Notes' : 'PIN dihapus.');
+  } catch (e) { out.textContent = 'Tidak bisa menghubungi server (' + e.message + ').'; }
+}
+let toastT = null;
+function toast(msg) {
+  let t = $('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600);
+}
+function applyTheme() { const t = LS.get('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; }
+function sure(el, label, fn) { // two clicks instead of confirm()
+  if (!el.dataset.sure) { const old = el.textContent; el.dataset.sure = '1'; el.textContent = label; setTimeout(() => { if (el.isConnected) { delete el.dataset.sure; el.textContent = old; } }, 4000); return; }
+  fn();
+}
+
+// ---------- actions ----------
+const findLine = id => (cur().lines || []).find(l => l.id === id);
+const A = {
+  view: el => setView(el.dataset.v),
+  menu: () => openMenu(),
+  close: () => dlg().close(),
+  logout: () => logout(),
+  gateback: () => { S.gate = null; render(); },
+  key: el => keyAct(el.dataset.v),
+  hload: el => { const h = S.items.get(S.user ? S.user + '/' + el.dataset.v : [...S.items.keys()].find(k => k.endsWith('/' + el.dataset.v))); if (!h) return; S.justEval = false; setExpr(h.data.e); updPreview(); },
+  hdel: el => { const h = S.items.get(S.user + '/' + el.dataset.v); if (h) put({ ...h, data: {}, deleted: true }); },
+  hdata: el => {
+    const h = S.items.get(S.user + '/' + el.dataset.v); if (!h) return; let v; try { v = Number(h.data.r.replace('E', 'e')); } catch {}
+    mutate(d => d.lines.push({ id: rid('l'), sh: 'expr', lb: '', e: h.data.e, r: v, tot: v, n: '1', unit: '', t: Date.now() }), true);
+    toast(`Ditambahkan ke "${cur().name || 'data baru'}" — ubah satuannya di 📐 Luas & Volume`); render();
+  },
+  histclear: el => sure(el, 'Yakin? Klik lagi', () => { for (const h of hist()) put({ ...h, data: {}, deleted: true }, true); render(); toast('Riwayat dihapus.'); }),
+  cat: el => { S.cat = el.dataset.v; LS.set('cat', S.cat); if (SMAP.get(S.shape).cat !== S.cat) { S.shape = SHAPES.find(s => s.cat === S.cat).id; LS.set('shape', S.shape); } S.edit = null; render(); },
+  shape: el => { S.shape = el.dataset.v; LS.set('shape', S.shape); S.edit = null; if (matchMedia('(max-width:820px)').matches) LS.del('chips'); render(); setTimeout(() => { if (!matchMedia('(pointer:coarse)').matches) $('#in-' + SMAP.get(S.shape).f[0].k)?.focus(); }, 20); },
+  chips: () => { chipsOpen() ? LS.del('chips') : LS.set('chips', '1'); render(); },
+  fopt: el => { form().o[el.dataset.k] = el.dataset.v; render(); },
+  fclear: () => { const fm = form(); fm.v = {}; fm.n = '1'; fm.lb = ''; render(); },
+  editline: el => {
+    const ln = findLine(el.dataset.v); if (!ln) return;
+    if (ln.sh === 'expr') { S.justEval = false; S.expr = ln.e; setView('calc'); toast('Ekspresi dibuka di kalkulator'); return; }
+    const sh = SMAP.get(ln.sh); S.cat = sh.cat; S.shape = sh.id; S.edit = ln.id;
+    const fm = form(sh.id); fm.v = { ...ln.v }; fm.u = { ...ln.u }; fm.o = { ...fm.o, ...ln.o }; fm.n = ln.n || '1'; fm.lb = ln.lb || '';
+    render(); $('#geo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
+  editcancel: () => { S.edit = null; const fm = form(); fm.v = {}; fm.lb = ''; fm.n = '1'; render(); },
+  dupline: el => { mutate(d => { const i = d.lines.findIndex(l => l.id === el.dataset.v); if (i >= 0) d.lines.splice(i + 1, 0, { ...clone(d.lines[i]), id: rid('l'), t: Date.now() }); }); },
+  delline: el => { if (S.edit === el.dataset.v) S.edit = null; mutate(d => { d.lines = d.lines.filter(l => l.id !== el.dataset.v); }); },
+  savedoc: () => saveDraft(),
+  newdoc: el => {
+    if (!S.curId && S.draft.lines.length) return sure(el, '⚠ Buang draft? Klik lagi', newData);
+    newData();
+  },
+  opendraft: () => { S.curId = null; LS.del(cacheKey() + '.cur'); setView('geo'); },
+  opendoc: el => openDoc(el.dataset.v),
+  docmenu: () => openDocMenu(),
+  copydoc: () => copyText(docText(cur())),
+  csvdoc: () => { const d = cur(); download((d.name || 'data-perhitungan').replace(/[^\w\- .]+/g, '_') + '.csv', docCsv(d), 'text/csv;charset=utf-8'); },
+  clearlines: el => sure(el, '⚠ Yakin? Klik lagi', () => { mutate(d => { d.lines = []; }); dlg().close(); }),
+  rename: el => openRename(el.dataset.v),
+  dupdoc: el => {
+    const it = S.items.get(el.dataset.v); if (!it) return;
+    const id = rid('d_'); put({ id, owner: S.user, kind: 'data', deleted: false, data: { ...clone(it.data), name: (it.data.name || 'Data') + ' (salinan)', created: Date.now() } }, true);
+    if (dlg().open) dlg().close(); render(); toast('Duplikat dibuat ✓');
+  },
+  deldoc: el => sure(el, '⚠ Hapus? Klik lagi', () => {
+    const it = S.items.get(el.dataset.v); if (!it) return;
+    put({ ...it, deleted: true }, true); if (S.curId === it.id) { S.curId = null; LS.del(cacheKey() + '.cur'); }
+    if (dlg().open) dlg().close(); render(); toast('Data dihapus.');
+  }),
+  pinsave: () => {
+    const old = $('#pin-old')?.value || '', a = $('#pin-new').value, b = $('#pin-new2').value, out = $('#pin-msg');
+    if (!/^\d{4,12}$/.test(a)) { out.textContent = PIN_MSG.format; return; }
+    if (a !== b) { out.textContent = 'PIN baru tidak sama.'; return; }
+    if (S.hasPin && !old) { out.textContent = 'Masukkan PIN saat ini.'; return; }
+    pinChange(old, a, out);
+  },
+  pinoff: () => { const old = $('#pin-old')?.value || '', out = $('#pin-msg'); if (!old) { out.textContent = 'Masukkan PIN saat ini untuk menghapus.'; return; } pinChange(old, '', out); }
+};
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a]'); if (!el || !A[el.dataset.a] || el.disabled) return;
+  if (ev.target.closest('select') && !el.matches('select')) return; // unit select inside a clickable row
+  ev.preventDefault(); ev.stopPropagation(); A[el.dataset.a](el);
+});
+// keypad buttons must not steal focus/caret from the display
+document.addEventListener('pointerdown', ev => { if (ev.target.closest('.key')) ev.preventDefault(); });
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.id === 'user-in') syncMask();
+  if (t.dataset.u) unitChange(t);
+  if (t.id === 'disp') { S.expr = t.value; S.justEval = false; S.err = ''; S.caret = [t.selectionStart, t.selectionEnd]; updPreview(); }
+  if (t.id === 'calc-q') { S.calcQ = t.value; render(); }
+  if (t.id === 'data-q') { S.q = t.value; render(); }
+  if (t.dataset.f) {
+    const fm = form(); if (t.dataset.f === 'n') fm.n = t.value; else if (t.dataset.f === 'lb') { fm.lb = t.value; return; } else fm.v[t.dataset.f] = t.value;
+    const sh = SMAP.get(S.shape), r = compute(sh, fm), box = $('#geo-res'); if (box) box.innerHTML = resBox(sh, r);
+    const lab = t.closest('.fi'), err = r.errs?.[t.dataset.f]; lab?.classList.toggle('bad', !!err);
+    let sm = lab?.querySelector('.ferr'); if (err) { if (!sm) { sm = document.createElement('small'); sm.className = 'ferr'; lab.appendChild(sm); } sm.textContent = err; } else sm?.remove();
+  }
+  if (t.id === 'doc-name') { const v = t.value; mutate(d => { d.name = v; }, true); }
+});
+function unitChange(t) { const fm = form(); fm.u[t.dataset.u] = t.value; LS.set('units.' + S.shape, JSON.stringify(fm.u)); const sh = SMAP.get(S.shape); const box = $('#geo-res'); if (box) box.innerHTML = resBox(sh, compute(sh, fm)); }
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset.u) unitChange(t);
+  if (t.name === 'theme') { t.value === 'auto' ? LS.del('theme') : LS.set('theme', t.value); applyTheme(); }
+  if (t.name === 'dec') { t.value === 'id' ? LS.del('dec') : LS.set('dec', t.value); render(); }
+  if (t.id === 'shape-sel') { S.shape = t.value; LS.set('shape', S.shape); S.edit = null; render(); }
+  if (t.dataset.lu) { const id = t.dataset.lu, v = t.value; mutate(d => { const ln = d.lines.find(l => l.id === id); if (ln) ln.unit = v; }); }
+});
+document.addEventListener('keyup', ev => { if (ev.target.id === 'disp') S.caret = [ev.target.selectionStart, ev.target.selectionEnd]; });
+document.addEventListener('selectionchange', () => { const d = disp(); if (d && document.activeElement === d) S.caret = [d.selectionStart, d.selectionEnd]; });
+document.addEventListener('keydown', ev => {
+  if (dlg().open || ev.metaKey || ev.ctrlKey || ev.altKey || S.view !== 'calc' || (!S.user && !S.admin)) return;
+  const t = ev.target, inDisp = t.id === 'disp', typing = /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) && !inDisp;
+  if (typing) return;
+  if (ev.key === 'Enter' || (ev.key === '=' )) { ev.preventDefault(); equals(); return; }
+  if (ev.key === 'Escape') { ev.preventDefault(); keyAct('@ac'); return; }
+  if (inDisp) { if (S.justEval && ev.key.length === 1) { // typing after "=": digits start fresh, operators continue
+      if (/[\d.(]/.test(ev.key)) { ev.preventDefault(); ins(ev.key); } else S.justEval = false; } return; }
+  if (ev.key === 'Backspace') { ev.preventDefault(); back(); return; }
+  const map = { '*': '×', '/': '÷', '-': '−', 'x': '×' };
+  if (/^[\d.+\-*/^()!%,]$|^x$/.test(ev.key)) { ev.preventDefault(); ins(map[ev.key] || ev.key); }
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target; ev.preventDefault();
+  if (f.id === 'geo-form') { addLine(); return; }
+  if (f.id === 'rename-form') { const it = S.items.get(f.dataset.k), v = $('#rename-in').value.trim(); if (it && v) put({ ...it, data: { ...it.data, name: v } }); dlg().close(); return; }
+  if (f.id === 'gate-form') {
+    const btn = f.querySelector('button'); btn.disabled = true; btn.textContent = 'Membuka…';
+    const pinMode = !!S.gate, name = pinMode ? S.gate.name : $('#user-in').value, pin = pinMode ? $('#pin-in').value : '';
+    if (pinMode && !pin) { btn.disabled = false; btn.textContent = 'Masuk'; $('#gate-err').textContent = PIN_MSG.need; return; }
+    login(name, pinMode ? '' : $('#pass-in').value, $('#remember').checked, pin).then(render, e => {
+      if (e.needPin && !pinMode) { S.gate = { name: normUser(name), msg: '' }; render(); return; }
+      btn.disabled = false; btn.textContent = 'Masuk'; $('#gate-err').textContent = e.message; const pi = $('#pin-in'); if (pi) { pi.value = ''; pi.focus(); } });
+  }
+});
+dlg().addEventListener('click', ev => { if (ev.target === dlg()) dlg().close(); }); // click on backdrop
+
+// ---------- auto update + boot ----------
+async function checkUpdate() { // phones keep old copies; load the newer build
+  if (dlg().open || S.queue.size) return;
+  try {
+    const r = await fetch(location.pathname + '?_=' + Date.now(), { cache: 'no-store' }); const m = /const BUILD = '([^']+)'/.exec(await r.text());
+    if (m && m[1] !== BUILD && m[1] !== '__BUILD__' && SS.get('reloaded') !== m[1]) { SS.set('reloaded', m[1]); location.replace(location.pathname + '?v=' + m[1] + location.hash); }
+  } catch {}
+}
+setInterval(() => { if (!document.hidden) syncNow(); }, 10000);
+setInterval(checkUpdate, 10 * 60e3);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncNow(); });
+window.addEventListener('online', () => syncNow());
+window.addEventListener('focus', () => syncNow());
+
+function boot() {
+  applyTheme(); checkUpdate();
+  let s = null; try { s = JSON.parse(LS.get('session') || 'null'); } catch {}
+  const ssUser = SS.get('user'), ssAdmin = SS.get('admin');
+  if (s?.admin || ssAdmin) {
+    if (ssAdmin) { S.admin = true; S.pass = ssAdmin; loadCache(); render(); liveStart(); syncNow(); return; }
+    LS.del('session'); // admin password is never stored on the device; ask again
+  } else if (s?.user || ssUser) {
+    const name = s?.user || ssUser, pin = SS.get('pin.' + name) || '';
+    if (LS.get('u.' + name + '.haspin') && !pin) { S.gate = { name, msg: '' }; render(); return; } // PIN asked on every new visit
+    S.user = name; S.pin = pin; S.hasPin = !!LS.get('u.' + name + '.haspin'); loadCache();
+    render(); liveStart(); syncNow(); return;
+  }
+  render();
+}
+boot();
+</script>
+</body>
+</html>
