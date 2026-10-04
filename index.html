@@ -53,12 +53,25 @@ h1,h2{letter-spacing:-.01em}
 /* calculator */
 .main.v-calc{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:18px;align-items:start}
 .calc{padding:16px}
-.screen{background:var(--soft);border-radius:14px;padding:10px 14px 6px;margin-bottom:14px}
+.screen{background:var(--soft);border-radius:14px;padding:10px 14px 6px;margin-bottom:14px;height:150px;display:flex;flex-direction:column;justify-content:space-between}
 .scr-top{display:flex;gap:6px;align-items:center;min-height:22px}
 .ind{font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);border-radius:6px;padding:1px 6px}
 .ind[hidden]{display:none}
 .preview{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:75%;font-variant-numeric:tabular-nums}
 .preview.err{color:var(--red)}
+.pretty{display:none;text-align:right;font-size:30px;font-weight:600;line-height:1.1;padding:2px 0;overflow-x:auto;overflow-y:hidden;white-space:nowrap;font-variant-numeric:tabular-nums;scrollbar-width:none}
+.pretty::-webkit-scrollbar{display:none}
+.screen.nat .pretty{display:block}
+.screen.nat .disp{font-size:17px;color:var(--muted);font-weight:500}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .12em;font-size:.82em;line-height:1.1}
+.fr-n{padding:0 .15em .06em;border-bottom:.08em solid currentColor}
+.fr-d{padding:.06em .15em 0}
+.box{display:inline-block;width:.6em;height:.8em;border:.07em dashed var(--muted);border-radius:.08em;vertical-align:middle}
+.pretty sup,.h-list sup,.preview sup{font-size:.6em}
+.rt-in{border-top:.07em solid currentColor;padding:0 .1em}
+.preview .fr,.h-e .fr{font-size:.9em}
+.key.sd{font-size:14px}
+.kfr{font-size:17px}.kfr .box{border-style:solid;border-color:currentColor;opacity:.85}
 .disp{width:100%;border:0!important;outline:0!important;background:none;text-align:right;font-size:40px;font-weight:600;padding:2px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.01em;caret-color:var(--acc)}
 .pads{display:grid;grid-template-columns:6fr 4fr;gap:14px}
 .sci{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;align-content:start}
@@ -229,6 +242,8 @@ dialog::backdrop{background:rgba(10,8,5,.45)}
   .calc{padding:10px}
   .screen{margin-bottom:10px}
   .disp{font-size:34px}
+  .screen{height:136px}
+  .pretty{font-size:26px}
   .pads{grid-template-columns:1fr;gap:8px}
   .sci,.basic{gap:6px}
   .key.sk{height:40px;font-size:13.5px;border-radius:10px}
@@ -257,7 +272,7 @@ dialog::backdrop{background:rgba(10,8,5,.45)}
 <dialog id="dlg"></dialog>
 <noscript>Calc memerlukan JavaScript.</noscript>
 <script>// Calc — kalkulator scientific + luas (m²) & volume (m³) konstruksi. Akun (nama pengguna + PIN) sama dengan Planner & Notes; data di Supabase (proyek saku-yuk), sinkron real time.
-const BUILD = '20261004-203905';
+const BUILD = '20261004-204901';
 const SB_URL = 'https://bbptcxpzzvgpxqylkrmw.supabase.co', SB_KEY = 'sb_publishable_Ny-WHCEZ3WmcLFsPBx9QeQ_9xgo7MxR'; // public key; tables closed, only cl_*/pl_* functions
 const ADMIN = 'admin';
 const HIST_MAX = 150;
@@ -302,7 +317,7 @@ function tokenize(s) {
     const v = map[c] || c;
     if (v === 'pi') out.push({ t: 'const', v: 'pi' });
     else if ('√∛'.includes(v)) out.push({ t: 'fn', v: v === '√' ? 'sqrt' : 'cbrt', pre: true });
-    else if ('+-×÷^()!%²³,'.includes(v)) out.push({ t: 'op', v });
+    else if ('+-×÷^()!%²³,⁄'.includes(v)) out.push({ t: 'op', v });
     else throw new Error('Karakter tidak dikenal: ' + c);
     i++;
   }
@@ -358,7 +373,8 @@ function evaluate(src, opt = {}) {
     return power();
   }
   function power() {
-    const b = postfix();
+    let b = postfix();
+    while (isOp('⁄')) { i++; const d = postfix(); if (d === 0) throw new Error('Pembagian dengan nol'); b = b / d; } // pecahan: pembilang ⁄ penyebut
     if (isOp('^')) { i++; return Math.pow(b, unary()); }
     return b;
   }
@@ -392,6 +408,57 @@ function evaluate(src, opt = {}) {
   if (!Number.isFinite(v)) throw new Error(v > 0 ? 'Tak hingga' : '−Tak hingga');
   return v;
 }
+// decimal → exact fraction "5⁄6" (continued fractions), null if no small fraction fits
+function toFrac(x) {
+  if (!Number.isFinite(x)) return null;
+  if (Number.isInteger(x)) return String(x);
+  const sg = x < 0 ? '−' : '', a0 = Math.abs(x); let h0 = 0, h1 = 1, k0 = 1, k1 = 0, b = a0;
+  for (let n = 0; n < 40; n++) {
+    const a = Math.floor(b), h2 = a * h1 + h0, k2 = a * k1 + k0;
+    if (k2 > 1e5) return null;
+    if (Math.abs(a0 - h2 / k2) <= 1e-12 * Math.max(1, a0)) return `${sg}${h2}⁄${k2}`;
+    h0 = h1; h1 = h2; k0 = k1; k1 = k2; if (b - a < 1e-14) return null; b = 1 / (b - a);
+  }
+  return null;
+}
+// expression → HTML with stacked fractions (pembilang di atas, penyebut di bawah) and superscript powers
+function pretty(src) {
+  const s = String(src ?? ''); let i = 0;
+  const BOX = '<i class="box"></i>';
+  function seq(inner) {
+    const it = [];
+    while (i < s.length) {
+      const c = s[i], rest = s.slice(i);
+      if (c === ')') { if (inner) break; it.push({ h: ')', op: 1 }); i++; continue; }
+      if (c === '(') { i++; const h = seq(true), cl = s[i] === ')'; if (cl) i++; it.push({ h: '(' + h + (cl ? ')' : ''), in: h }); continue; }
+      let m = /^(?:\d+\.?\d*|\.\d+)(?:E[+\-−]?\d+)?/.exec(rest);
+      if (m) { it.push({ h: esc(m[0]) }); i += m[0].length; continue; }
+      m = ID_RE.exec(rest);
+      if (m && m[1] !== 'mod') {
+        i += m[1].length;
+        if (FUNCS.includes(m[1]) && s[i] === '(') { i++; const h = seq(true), cl = s[i] === ')'; if (cl) i++; it.push({ h: `${esc(m[1])}(${h}${cl ? ')' : ''}` }); }
+        else it.push({ h: m[1] === 'pi' ? 'π' : esc(m[1]) });
+        continue;
+      }
+      if (c === '⁄' || c === '^') { it.push({ k: c }); i++; continue; }
+      if (c === '√' || c === '∛') { i++; let h = ''; if (s[i] === '(') { i++; h = seq(true); if (s[i] === ')') i++; } it.push({ h: `<span class="rt">${c}<span class="rt-in">${h || BOX}</span></span>` }); continue; }
+      if (m) { it.push({ h: ' mod ', op: 1 }); i += m[1].length; continue; }
+      it.push({ h: esc(c), op: /[+\-−×÷,]/.test(c) ? 1 : 0 }); i++;
+    }
+    const out = []; // combine a⁄b and a^b (left to right)
+    for (let j = 0; j < it.length; j++) {
+      const x = it[j];
+      if (!x.k) { out.push(x); continue; }
+      const prev = out.length && !out[out.length - 1].op ? out.pop() : null, nx = it[j + 1] && !it[j + 1].op && !it[j + 1].k ? it[++j] : null;
+      const body = a => a ? (a.in !== undefined ? a.in : a.h) : BOX;
+      if (x.k === '⁄') out.push({ h: `<span class="fr"><span class="fr-n">${body(prev)}</span><span class="fr-d">${body(nx)}</span></span>` });
+      else out.push({ h: `${prev ? prev.h : BOX}<sup>${body(nx)}</sup>` });
+    }
+    return out.map(x => x.h).join('');
+  }
+  return seq(false);
+}
+const natural = s => /[⁄^√∛]/.test(String(s ?? ''));
 const fmtCalc = x => { const s = String(Number(x.toPrecision(15))); return s.replace('e', 'E'); };
 
 // dimension inputs: accept "0,4", "40", "2*1,5", "3+0.25"
@@ -402,7 +469,7 @@ function numIn(raw) {
 }
 
 // ---------- shapes (luas m² & volume m³) ----------
-const UNITS = { m: 1, cm: 0.01, mm: 0.001 };
+const UNITS = { cm: 0.01, m: 1, mm: 0.001 }, AUNITS = { 'cm²': 1e-4, 'm²': 1 }, DEF_U = 'cm', DEF_AU = 'cm²';
 const L = (k, l, o = {}) => ({ k, l, t: 'len', ...o }), CNT = (k, l, o = {}) => ({ k, l, t: 'n', ...o }), AR = (k, l, o = {}) => ({ k, l, t: 'area', ...o }), DG = (k, l, o = {}) => ({ k, l, t: 'deg', ...o });
 const PI4 = Math.PI / 4;
 const SHAPES = [
@@ -428,7 +495,7 @@ const SHAPES = [
     rumus: 'V = p × tb × (b + 2·√(h² + m²))', c: v => { const s = Math.sqrt(v.h * v.h + v.m * v.m); return [v.p * v.tb * (v.b + 2 * s), `${N(v.p)} × ${N(v.tb)} × (${N(v.b)} + 2 × ${N(s)})`]; } },
   { id: 'tangga', cat: 'vol', g: 'Struktur beton', n: 'Tangga beton', ic: '🪜', svg: ['stair'], f: [L('b', 'b — lebar tangga'), L('o', 'o — optrede (tinggi anak tangga)'), L('a', 'a — antrede (lebar injakan)'), CNT('n', 'n — jumlah anak tangga'), L('tb', 'tb — tebal plat tangga')],
     rumus: 'V = b × n × (o × a / 2 + tb × √(o² + a²))', c: v => { const s = Math.sqrt(v.o * v.o + v.a * v.a); return [v.b * v.n * (v.o * v.a / 2 + v.tb * s), `${N(v.b)} × ${N(v.n)} × (${N(v.o)} × ${N(v.a)} / 2 + ${N(v.tb)} × ${N(s)})`]; } },
-  { id: 'dinding', cat: 'vol', g: 'Struktur beton', n: 'Dinding beton / pasangan', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), L('tb', 'tb — tebal dinding'), AR('bk', 'Bukaan pintu/jendela (m²)', { opt: 1 })],
+  { id: 'dinding', cat: 'vol', g: 'Struktur beton', n: 'Dinding beton / pasangan', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), L('tb', 'tb — tebal dinding'), AR('bk', 'Bukaan pintu/jendela (luas)', { opt: 1 })],
     rumus: 'V = (p × t − bukaan) × tb', c: v => [(v.p * v.t - (v.bk || 0)) * v.tb, `(${N(v.p)} × ${N(v.t)}${v.bk ? ' − ' + N(v.bk) : ''}) × ${N(v.tb)}`] },
   // volume — tanah & pondasi
   { id: 'galian', cat: 'vol', g: 'Tanah & pondasi', n: 'Galian / urugan trapesium', ic: '⛏', svg: ['trap', 'la', 'lb', 't'], f: [L('p', 'p — panjang galian'), L('la', 'la — lebar atas'), L('lb', 'lb — lebar bawah'), L('t', 't — kedalaman')], rumus: 'V = (la + lb) / 2 × t × p', c: v => [(v.la + v.lb) / 2 * v.t * v.p, `(${N(v.la)} + ${N(v.lb)}) / 2 × ${N(v.t)} × ${N(v.p)}`] },
@@ -452,7 +519,7 @@ const SHAPES = [
   { id: 'lingkaran', cat: 'area', g: 'Bidang datar', n: 'Lingkaran', ic: '○', svg: ['circ'], f: [L('d', 'd — diameter')], rumus: 'A = ¼ π × d²', c: v => [PI4 * v.d * v.d, `¼π × ${N(v.d)}²`] },
   { id: 'jajar', cat: 'area', g: 'Bidang datar', n: 'Jajar genjang', ic: '▱', svg: ['para'], f: [L('a', 'a — alas'), L('t', 't — tinggi')], rumus: 'A = a × t', c: v => [v.a * v.t, `${N(v.a)} × ${N(v.t)}`] },
   { id: 'ketupat', cat: 'area', g: 'Bidang datar', n: 'Belah ketupat / layang-layang', ic: '◇', svg: ['kite'], f: [L('d1', 'd1 — diagonal 1'), L('d2', 'd2 — diagonal 2')], rumus: 'A = ½ × d1 × d2', c: v => [v.d1 * v.d2 / 2, `½ × ${N(v.d1)} × ${N(v.d2)}`] },
-  { id: 'dindingluas', cat: 'area', g: 'Konstruksi', n: 'Dinding / plester / cat', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), AR('bk', 'Bukaan pintu/jendela (m²)', { opt: 1 }), CNT('s', 'Jumlah sisi (1 atau 2)', { opt: 1 })],
+  { id: 'dindingluas', cat: 'area', g: 'Konstruksi', n: 'Dinding / plester / cat', ic: '🧱', svg: ['wall'], f: [L('p', 'p — panjang dinding'), L('t', 't — tinggi dinding'), AR('bk', 'Bukaan pintu/jendela (luas)', { opt: 1 }), CNT('s', 'Jumlah sisi (1 atau 2)', { opt: 1 })],
     rumus: 'A = (p × t − bukaan) × sisi', c: v => { const s = v.s || 1; return [(v.p * v.t - (v.bk || 0)) * s, `(${N(v.p)} × ${N(v.t)}${v.bk ? ' − ' + N(v.bk) : ''})${s !== 1 ? ' × ' + N(s) : ''}`]; } },
   { id: 'lantai', cat: 'area', g: 'Konstruksi', n: 'Lantai / keramik', ic: '🔲', svg: ['rect', 'p', 'l'], f: [L('p', 'p — panjang ruang'), L('l', 'l — lebar ruang')], rumus: 'A = p × l', c: v => [v.p * v.l, `${N(v.p)} × ${N(v.l)}`] },
   { id: 'bkkolom', cat: 'area', g: 'Konstruksi', n: 'Bekisting kolom', ic: '🏛', svg: ['box', 'p', 'l', 't'], f: [L('p', 'p — panjang penampang'), L('l', 'l — lebar penampang'), L('t', 't — tinggi kolom')], rumus: 'A = 2 × (p + l) × t', c: v => [2 * (v.p + v.l) * v.t, `2 × (${N(v.p)} + ${N(v.l)}) × ${N(v.t)}`] },
@@ -578,7 +645,7 @@ const lineUnit = ln => ln.sh === 'expr' ? (ln.unit === 'm3' ? 'm³' : ln.unit ==
 function lineDims(ln) {
   if (ln.sh === 'expr') return ln.e;
   const sh = SMAP.get(ln.sh); if (!sh) return '';
-  const parts = sh.f.filter(f => String(ln.v?.[f.k] ?? '').trim()).map(f => `${f.k} ${String(ln.v[f.k]).trim()}${f.t === 'len' ? ' ' + (ln.u?.[f.k] || 'm') : f.t === 'area' ? ' m²' : f.t === 'deg' ? '°' : ''}`);
+  const parts = sh.f.filter(f => String(ln.v?.[f.k] ?? '').trim()).map(f => `${f.k} ${String(ln.v[f.k]).trim()}${f.t === 'len' ? ' ' + (ln.u?.[f.k] || 'm') : f.t === 'area' ? ' ' + (ln.u?.[f.k] || 'm²') : f.t === 'deg' ? '°' : ''}`);
   const o = (sh.opts || []).map(op => ln.o?.[op.k] && ln.o[op.k] !== op.o[0][0] ? op.o.find(x => x[0] === ln.o[op.k])?.[1] : '').filter(Boolean);
   return parts.join(' × ') + (o.length ? ' · ' + o.join(', ') : '');
 }
@@ -586,8 +653,9 @@ function lineDims(ln) {
 // ---------- form compute ----------
 function form(id = S.shape) {
   if (!S.forms[id]) {
-    let u = {}; try { u = JSON.parse(LS.get('units.' + id) || '{}'); } catch {}
-    const sh = SMAP.get(id), o = {}; for (const op of sh.opts || []) o[op.k] = op.o[0][0];
+    let u = {}; try { u = JSON.parse(LS.get('units2.' + id) || '{}'); } catch {}
+    const sh = SMAP.get(id), o = {};
+    for (const f of sh.f) if (f.t === 'len' || f.t === 'area') u[f.k] ||= f.t === 'len' ? DEF_U : DEF_AU; // semua ukuran default cm for (const op of sh.opts || []) o[op.k] = op.o[0][0];
     S.forms[id] = { v: {}, u, n: '1', lb: '', o };
   }
   return S.forms[id];
@@ -600,7 +668,8 @@ function compute(sh, fm) { // → {ok, val, tot, f, errs:{k:msg}, msg}
     try {
       let x = numIn(raw);
       if (x < 0) throw new Error('Tidak boleh negatif');
-      if (f.t === 'len') x *= UNITS[fm.u[f.k] || 'm'];
+      if (f.t === 'len') x *= UNITS[fm.u[f.k] || DEF_U];
+      if (f.t === 'area') x *= AUNITS[fm.u[f.k] || DEF_AU];
       v[f.k] = x;
     } catch (e) { errs[f.k] = e.message; }
   }
@@ -626,9 +695,9 @@ function addLine() {
 
 // ---------- calculator ----------
 function calcEval(s = S.expr) { return evaluate(s, { deg: S.deg, ans: S.ans }); }
-function pushHist(e, r) {
+function pushHist(e, r, v) {
   if (RO()) return;
-  put({ id: rid('h_'), owner: S.user, kind: 'hist', deleted: false, data: { e, r, t: Date.now(), deg: S.deg } }, true);
+  put({ id: rid('h_'), owner: S.user, kind: 'hist', deleted: false, data: { e, r, v, t: Date.now(), deg: S.deg } }, true);
   const h = hist(); for (const x of h.slice(HIST_MAX)) put({ ...x, data: {}, deleted: true }, true);
 }
 function disp() { return $('#disp'); }
@@ -639,7 +708,7 @@ function setExpr(s, pos = s.length) {
   updPreview();
 }
 function ins(txt) {
-  const startNew = S.justEval && !/^[+\-−×÷^²³!%),E]|^ mod /.test(txt); // after "=": a number/function starts fresh, an operator continues
+  const startNew = S.justEval && !/^[+\-−×÷^²³!%),E⁄]|^ mod /.test(txt); // after "=": a number/function starts fresh, an operator continues
   S.justEval = false;
   if (startNew) { setExpr(txt); return; }
   const [a, b] = caretPos(), s = S.expr;
@@ -657,21 +726,30 @@ function back() {
 function equals() {
   const e = S.expr.trim(); if (!e) return;
   try {
-    const v = calcEval(e), r = fmtCalc(v);
-    if (e !== r) pushHist(e, r);
+    const v = calcEval(e), fr = /⁄/.test(e) ? toFrac(v) : null, r = fr || fmtCalc(v);
+    S.showFrac = !!fr;
+    if (e !== r) pushHist(e, r, v);
     S.ans = v; LS.set('ans', String(v)); S.justEval = true;
     setExpr(r); S.lastEq = { e, r };
     render();
   } catch (err) { S.err = err.message; updPreview(); }
 }
 function updPreview() {
-  const p = $('#preview'); if (!p) return;
+  const p = $('#preview'), nat = $('#pretty'), scr = $('.screen'); if (!p) return;
+  const showNat = natural(S.expr);
+  if (nat) { nat.innerHTML = showNat ? pretty(S.expr) : ''; scr?.classList.toggle('nat', showNat); }
   if (S.err) { p.textContent = '⚠ ' + S.err; p.className = 'preview err'; return; }
   let t = '';
-  if (S.justEval && S.lastEq) t = S.lastEq.e + ' =';
-  else if (S.expr.trim() && !/^-?[\d.]+$/.test(S.expr.trim())) { try { t = '= ' + fmtCalc(calcEval()); } catch {} }
-  p.textContent = t; p.className = 'preview';
+  if (S.justEval && S.lastEq) t = pretty(S.lastEq.e) + ' =' + (S.showFrac ? ` <span class="muted">(≈ ${esc(fmtCalc(S.ans))})</span>` : '');
+  else if (S.expr.trim() && !/^-?[\d.]+$/.test(S.expr.trim())) { try { const v = calcEval(), f = /⁄/.test(S.expr) ? toFrac(v) : null; t = '= ' + (f ? pretty(f) + ` <span class="muted">≈ ${esc(fmtCalc(v))}</span>` : esc(fmtCalc(v))); } catch {} }
+  p.innerHTML = t; p.className = 'preview';
   const m = $('#mem-ind'); if (m) m.hidden = !S.mem;
+}
+function sdToggle() { // S⇔D: hasil pecahan ⇄ desimal
+  if (!S.justEval) { equals(); if (!S.justEval) return; if (S.showFrac) return; }
+  if (S.showFrac) { S.showFrac = false; setExpr(fmtCalc(S.ans)); }
+  else { const f = toFrac(S.ans); if (!f || !/⁄/.test(f)) { toast(f ? 'Hasilnya bilangan bulat' : 'Tidak bisa diubah ke pecahan sederhana'); return; } S.showFrac = true; setExpr(f); }
+  S.justEval = true; updPreview();
 }
 function memOp(op) {
   if (op === 'mc') { S.mem = 0; }
@@ -685,14 +763,14 @@ const SCI = [
   [['sin', 'sin(', '', 'sin⁻¹', 'asin('], ['cos', 'cos(', '', 'cos⁻¹', 'acos('], ['tan', 'tan(', '', 'tan⁻¹', 'atan('], ['ln', 'ln(', 'Logaritma natural', 'log₂', 'log2('], ['log', 'log(', 'Logaritma basis 10', 'eˣ', 'e^('], ['(', '(']],
   [['x²', '²', 'Kuadrat', 'sinh', 'sinh('], ['x³', '³', 'Pangkat tiga', 'cosh', 'cosh('], ['xʸ', '^', 'Pangkat', 'tanh', 'tanh('], ['√', '√(', 'Akar kuadrat', 'ʸ√x', '^(1÷'], ['∛', '∛(', 'Akar pangkat tiga', '10ˣ', '10^('], [')', ')']],
   [['1/x', '^(−1)', 'Kebalikan'], ['x!', '!', 'Faktorial', 'nCr', 'nCr('], ['|x|', 'abs(', 'Nilai mutlak', 'nPr', 'nPr('], ['π', 'π', 'Pi'], ['e', 'e', 'Bilangan Euler', 'Rand', 'rand'], [',', ',', 'Pemisah argumen (nCr, nPr)']],
-  [['EXP', 'E', '×10ⁿ'], ['mod', ' mod ', 'Sisa bagi'], ['Ans', 'Ans', 'Hasil terakhir'], ['rnd', 'round(', 'Pembulatan: round(x, desimal)', '⌊x⌋', 'floor('], ['%', '%', 'Persen'], ['±', '@neg', 'Ubah tanda']]
+  [['EXP', 'E', '×10ⁿ'], ['mod', ' mod ', 'Sisa bagi', 'rnd', 'round('], ['Ans', 'Ans', 'Hasil terakhir'], ['▭⁄▭', '@frac', 'Pecahan (pembilang / penyebut)', '⌊x⌋', 'floor('], ['%', '%', 'Persen'], ['±', '@neg', 'Ubah tanda']]
 ];
 const BASIC = [
   [['AC', '@ac', 'Hapus semua', '', '', 'fn'], ['⌫', '@del', 'Hapus 1', '', '', 'fn'], ['( )', '@par', 'Kurung'], ['÷', '÷', '', '', '', 'op']],
   [['7', '7'], ['8', '8'], ['9', '9'], ['×', '×', '', '', '', 'op']],
   [['4', '4'], ['5', '5'], ['6', '6'], ['−', '−', '', '', '', 'op']],
   [['1', '1'], ['2', '2'], ['3', '3'], ['+', '+', '', '', '', 'op']],
-  [['0', '0'], ['00', '00'], ['.', '.'], ['=', '@eq', '', '', '', 'eq']]
+  [['0', '0'], ['S⇔D', '@sd', 'Ubah hasil: pecahan ⇄ desimal', '', '', 'fn sd'], ['.', '.'], ['=', '@eq', '', '', '', 'eq']]
 ];
 function smartParen() { // "( )": opens unless a "(" is waiting to be closed after a value
   const [a] = caretPos(), s = S.expr.slice(0, a), open = (s.match(/\(/g) || []).length - (s.match(/\)/g) || []).length;
@@ -715,6 +793,8 @@ function keyAct(v) {
     case '@eq': equals(); break;
     case '@par': smartParen(); break;
     case '@neg': negate(); break;
+    case '@frac': ins('⁄'); break; // angka sebelum ⁄ = pembilang, sesudahnya = penyebut
+    case '@sd': sdToggle(); break;
     case '@2nd': S.second = !S.second; render(); break;
     case '@deg': S.deg = !S.deg; LS.set('deg', S.deg ? 'deg' : 'rad'); render(); break;
     case '@mc': case '@mr': case '@m+': case '@m-': memOp(v.slice(1)); break;
@@ -864,12 +944,13 @@ function calcView() {
   const key = (k, cls = '') => {
     const alt = S.second && k[3], lab = alt ? k[3] : k[0], v = alt ? k[4] : k[1];
     const lab2 = k[1] === '@deg' ? (S.deg ? 'DEG' : 'RAD') : lab;
-    return `<button type="button" class="key ${cls} ${k[5] || ''}${alt ? ' alt' : ''}${k[1] === '@2nd' && S.second ? ' on' : ''}" data-a="key" data-v="${esc(v)}" title="${esc(k[2] || '')}">${esc(lab2)}</button>`;
+    return `<button type="button" class="key ${cls} ${k[5] || ''}${alt ? ' alt' : ''}${k[1] === '@2nd' && S.second ? ' on' : ''}" data-a="key" data-v="${esc(v)}" title="${esc(k[2] || '')}">${lab2 === '▭⁄▭' ? '<span class="fr kfr"><span class="fr-n"><i class="box"></i></span><span class="fr-d"><i class="box"></i></span></span>' : esc(lab2)}</button>`;
   };
   const h = hist(), q = S.calcQ.trim().toLowerCase(), hf = q ? h.filter(x => (x.data.e + ' ' + x.data.r).toLowerCase().includes(q)) : h;
   return `<section class="calc card">
       <div class="screen">
         <div class="scr-top"><span class="ind">${S.deg ? 'DEG' : 'RAD'}</span><span class="ind" id="mem-ind"${S.mem ? '' : ' hidden'}>M</span>${S.second ? '<span class="ind">2nd</span>' : ''}<span class="sp"></span><span class="preview" id="preview"></span></div>
+        <div class="pretty" id="pretty" aria-hidden="true"></div>
         <input id="disp" class="disp" autocomplete="off" autocapitalize="off" spellcheck="false" ${coarse ? 'inputmode="none"' : ''} placeholder="0" aria-label="Ekspresi">
       </div>
       <div class="pads">
@@ -881,7 +962,7 @@ function calcView() {
       <div class="h-head"><h2>🕘 Riwayat hitung <span class="muted">${h.length}</span></h2>${h.length && !RO() ? '<button type="button" class="btn sm danger" data-a="histclear" id="hc-btn">Hapus semua</button>' : ''}</div>
       ${h.length > 6 ? `<input class="h-q" id="calc-q" type="search" placeholder="Cari riwayat…" value="${esc(S.calcQ)}">` : ''}
       <div class="h-list">${hf.map(x => `<div class="h-row" data-a="hload" data-v="${esc(x.id)}" title="Klik untuk memakai lagi">
-          <div class="h-e">${esc(x.data.e)}</div><div class="h-r">= ${esc(x.data.r)}</div>
+          <div class="h-e">${pretty(x.data.e)}</div><div class="h-r">= ${pretty(x.data.r)}</div>
           <div class="h-meta"><span class="muted small">${fullDT(x.data.t)}</span><span class="sp"></span>${RO() ? '' : `<button type="button" class="btn xs" data-a="hdata" data-v="${esc(x.id)}" title="Tambahkan hasil ini ke data perhitungan">＋ Data</button><button type="button" class="btn xs" data-a="hdel" data-v="${esc(x.id)}" title="Hapus">✕</button>`}</div>
         </div>`).join('') || `<p class="muted small empty">Belum ada riwayat. Setiap kali menekan <b>=</b>, perhitungan tersimpan di sini dan ikut tersinkron ke HP/laptop lain.</p>`}</div>
     </section>`;
@@ -894,7 +975,8 @@ function geoView() {
   const groups = [...new Set(SHAPES.filter(s => s.cat === S.cat).map(s => s.g))];
   const fld = f => {
     const err = r.errs?.[f.k];
-    const unit = f.t === 'len' ? `<select class="u" data-u="${f.k}" aria-label="Satuan ${esc(f.k)}">${Object.keys(UNITS).map(u => `<option${(fm.u[f.k] || 'm') === u ? ' selected' : ''}>${u}</option>`).join('')}</select>` : `<span class="u fixed">${f.t === 'area' ? 'm²' : f.t === 'deg' ? '°' : 'bh'}</span>`;
+    const U = f.t === 'len' ? UNITS : f.t === 'area' ? AUNITS : null;
+    const unit = U ? `<select class="u" data-u="${f.k}" aria-label="Satuan ${esc(f.k)}">${Object.keys(U).map(u => `<option${fm.u[f.k] === u ? ' selected' : ''}>${u}</option>`).join('')}</select>` : `<span class="u fixed">${f.t === 'deg' ? '°' : 'bh'}</span>`;
     return `<label class="fi${err ? ' bad' : ''}"><span>${esc(f.l)}${f.opt ? ' <i class="muted">(opsional)</i>' : ''}</span>
       <span class="fi-in"><input id="in-${f.k}" data-f="${f.k}" inputmode="decimal" autocomplete="off" value="${esc(fm.v[f.k] ?? '')}" placeholder="0"${ro ? ' disabled' : ''}>${unit}</span>${err ? `<small class="ferr">${esc(err)}</small>` : ''}</label>`;
   };
@@ -911,7 +993,7 @@ function geoView() {
           <label class="fi${r.errs?.n ? ' bad' : ''}"><span>Jumlah (×)</span><span class="fi-in"><input id="in-n" data-f="n" inputmode="decimal" value="${esc(fm.n)}" placeholder="1"${ro ? ' disabled' : ''}><span class="u fixed">bh</span></span>${r.errs?.n ? `<small class="ferr">${esc(r.errs.n)}</small>` : ''}</label>
           <label class="fi wide"><span>Nama item <i class="muted">(opsional, mis. K1, B2, Saluran Jl. Mawar)</i></span><input id="in-lb" data-f="lb" value="${esc(fm.lb)}" maxlength="80"${ro ? ' disabled' : ''}></label>
         </div>
-        <p class="muted small tip">💡 Isian boleh berupa hitungan, mis. <b>2*1,5</b> atau <b>3+0,25</b>. Desimal pakai koma atau titik. Satuan tiap ukuran bisa m / cm / mm.</p>
+        <p class="muted small tip">💡 Isian boleh berupa hitungan, mis. <b>2*1,5</b> atau <b>3+0,25</b>. Desimal pakai koma atau titik. Satuan ukuran default <b>cm</b> (bisa diganti m / mm); hasil dalam m² / m³.</p>
         <div class="res" id="geo-res">${resBox(sh, r)}</div>
         ${ro ? '' : `<div class="f-act">${S.edit ? '<button type="button" class="btn" data-a="editcancel">Batal</button>' : '<button type="button" class="btn" data-a="fclear">Kosongkan</button>'}<button type="submit" class="btn primary">${S.edit ? '✓ Perbarui baris' : '＋ Tambah ke data'}</button></div>`}
       </form>
@@ -1082,7 +1164,7 @@ const A = {
   hload: el => { const h = S.items.get(S.user ? S.user + '/' + el.dataset.v : [...S.items.keys()].find(k => k.endsWith('/' + el.dataset.v))); if (!h) return; S.justEval = false; setExpr(h.data.e); updPreview(); },
   hdel: el => { const h = S.items.get(S.user + '/' + el.dataset.v); if (h) put({ ...h, data: {}, deleted: true }); },
   hdata: el => {
-    const h = S.items.get(S.user + '/' + el.dataset.v); if (!h) return; let v; try { v = Number(h.data.r.replace('E', 'e')); } catch {}
+    const h = S.items.get(S.user + '/' + el.dataset.v); if (!h) return; let v = h.data.v; if (!Number.isFinite(v)) try { v = evaluate(h.data.r); } catch { v = NaN; }
     mutate(d => d.lines.push({ id: rid('l'), sh: 'expr', lb: '', e: h.data.e, r: v, tot: v, n: '1', unit: '', t: Date.now() }), true);
     toast(`Ditambahkan ke "${cur().name || 'data baru'}" — ubah satuannya di 📐 Luas & Volume`); render();
   },
@@ -1096,7 +1178,7 @@ const A = {
     const ln = findLine(el.dataset.v); if (!ln) return;
     if (ln.sh === 'expr') { S.justEval = false; S.expr = ln.e; setView('calc'); toast('Ekspresi dibuka di kalkulator'); return; }
     const sh = SMAP.get(ln.sh); S.cat = sh.cat; S.shape = sh.id; S.edit = ln.id;
-    const fm = form(sh.id); fm.v = { ...ln.v }; fm.u = { ...ln.u }; fm.o = { ...fm.o, ...ln.o }; fm.n = ln.n || '1'; fm.lb = ln.lb || '';
+    const fm = form(sh.id); fm.v = { ...ln.v }; fm.u = Object.fromEntries(sh.f.filter(f => f.t === 'len' || f.t === 'area').map(f => [f.k, ln.u?.[f.k] || (f.t === 'len' ? 'm' : 'm²')])); fm.o = { ...fm.o, ...ln.o }; fm.n = ln.n || '1'; fm.lb = ln.lb || '';
     render(); $('#geo-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
   editcancel: () => { S.edit = null; const fm = form(); fm.v = {}; fm.lb = ''; fm.n = '1'; render(); },
@@ -1155,7 +1237,7 @@ document.addEventListener('input', ev => {
   }
   if (t.id === 'doc-name') { const v = t.value; mutate(d => { d.name = v; }, true); }
 });
-function unitChange(t) { const fm = form(); fm.u[t.dataset.u] = t.value; LS.set('units.' + S.shape, JSON.stringify(fm.u)); const sh = SMAP.get(S.shape); const box = $('#geo-res'); if (box) box.innerHTML = resBox(sh, compute(sh, fm)); }
+function unitChange(t) { const fm = form(); fm.u[t.dataset.u] = t.value; LS.set('units2.' + S.shape, JSON.stringify(fm.u)); const sh = SMAP.get(S.shape); const box = $('#geo-res'); if (box) box.innerHTML = resBox(sh, compute(sh, fm)); }
 document.addEventListener('change', ev => {
   const t = ev.target;
   if (t.dataset.u) unitChange(t);
